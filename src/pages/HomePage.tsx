@@ -13,6 +13,7 @@ import { FutureVisionSection } from '../components/sections/FutureVisionSection'
 import { GlobalSection } from '../components/sections/GlobalSection';
 import { InsightsSection } from '../components/sections/InsightsSection';
 import { PartnerSection } from '../components/sections/PartnerSection';
+import { TrustComplianceSection } from '../components/sections/TrustComplianceSection';
 
 export function HomePage() {
   return (
@@ -33,6 +34,7 @@ export function HomePage() {
       <GlobalSection />
       <InsightsSection />
       <PartnerSection />
+      <TrustComplianceSection />
     </PageWrapper>
   );
 }

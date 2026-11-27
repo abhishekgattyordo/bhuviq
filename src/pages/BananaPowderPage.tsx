@@ -3,7 +3,6 @@ import { jsPDF } from 'jspdf';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
 import { CURRENT_PRODUCT } from '../data/products';
 import { PRODUCT_SPEC_SHEET } from '../data/quality';
 import {
@@ -23,15 +22,18 @@ import { useRouter } from '../context/RouterContext';
 import { cn } from '../lib/utils';
 
 type SpecFilter = 'all' | 'physicochemical' | 'microbiological' | 'nutritional';
+type SectionId = 'product-overview' | 'technical-specifications' | 'packaging-logistics' | 'applications';
 
 export function BananaPowderPage() {
   const { openSpecSheetModal, navigate } = useRouter();
   const [specFilter, setSpecFilter] = useState<SpecFilter>('all');
+  const [activeSection, setActiveSection] = useState<SectionId>('product-overview');
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
   const [heroImgLoaded, setHeroImgLoaded] = useState(true);
   const [overviewImgLoaded, setOverviewImgLoaded] = useState(true);
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = (id: SectionId) => {
+    setActiveSection(id);
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -108,25 +110,25 @@ export function BananaPowderPage() {
 
     y = 112;
 
-    // 1. Product Overview & Composition
+    // 1. Product Overview, Maturity & Composition
     addSectionTitle('1. Product Overview, Maturity & Composition');
     addRow('Product Name', 'Banana Powder (100% Pure)');
     addRow('Botanical Source', CURRENT_PRODUCT.botanicalName);
     addRow('Geographic Origin', 'India (Approved agricultural clusters)');
-    addRow('Banana Maturity', 'Ripe (controlled maturity & °Brix graded prior to dehydration)');
-    addRow('Ingredient Composition', '100% Pure Banana (zero carriers, fillers, maltodextrin, or additives)');
+    addRow('Banana Maturity', 'Ripe (controlled ripeness & °Brix graded prior to dehydration)');
+    addRow('Ingredient Composition', '100% Pure Banana (no carriers, fillers, maltodextrin, or additives)');
     addRow('Banana Peel Status', 'Excluded (sanitary washed and hygienically peeled prior to processing)');
     addRow('Processing Method', 'Enclosed SS-316 low-temperature dehydration and calibrated milling');
     y += 8;
 
     // 2. Physicochemical Specifications
     addSectionTitle('2. Physicochemical Specifications');
-    addRow('Moisture Content (LOD)', '≤ 5.0% w/w', 'Halogen / AOAC 925.10 / Karl Fischer');
-    addRow('Water Activity (aw)', 'Pending batch-specific lab confirmation (issued on COA upon request)');
-    addRow('Particle Size / Mesh', '≥ 95% passes through 60 to 100 Mesh', 'ASTM Sieve Analysis');
-    addRow('Colour / Appearance', 'Pale golden-ivory to light cream fine free-flowing powder', 'Visual / Lovibond');
-    addRow('pH (10% aqueous solution)', '4.8 – 5.6', 'Potentiometric');
-    addRow('Bulk Density', '0.45 – 0.65 g/ml (Tapped)', 'USP <616>');
+    addRow('Moisture Content (LOD)', '<= 5.0% w/w', 'Halogen / AOAC 925.10 / Karl Fischer');
+    addRow('Water Activity (aw)', 'Not published - confirmed per lot COA upon request');
+    addRow('Particle Size / Mesh', '>= 95% pass through 60 to 100 Mesh', 'ASTM Sieve Analysis');
+    addRow('Colour / Appearance', 'Pale golden-ivory to light cream, fine free-flowing powder', 'Visual / Lovibond');
+    addRow('pH (10% aqueous solution)', '4.8 - 5.6', 'Potentiometric');
+    addRow('Bulk Density', '0.45 - 0.65 g/ml (Tapped)', 'USP <616>');
     addRow('Aroma & Taste', 'Characteristic ripe banana aroma, clean natural sweet profile', 'Organoleptic');
     y += 8;
 
@@ -137,19 +139,19 @@ export function BananaPowderPage() {
     });
     addRow(
       'Heavy Metals (Pb, As, Cd, Hg)',
-      'Pending batch-specific accredited lab confirmation (full screening dossier available per COA on request)'
+      'Not published - accredited lab screening dossier confirmed per batch COA upon request'
     );
     y += 8;
 
     // 4. Nutritional Information
-    addSectionTitle('4. Nutritional Information');
+    addSectionTitle('4. Nutritional Values');
     addRow(
       'Confirmed Profile',
-      '100% single-ingredient banana carbohydrates, naturally occurring dietary potassium and soluble fibers; zero added sugars or carriers.'
+      '100% single-ingredient ripe banana carbohydrates, naturally occurring dietary potassium and soluble fibers; zero added sugars or carriers.'
     );
     addRow(
       'Quantitative Nutrition Panel',
-      'Pending accredited per-100g lab assay (verified values issued with commercial technical dossier upon request).'
+      'Not yet published - accredited per-100g nutritional values are issued upon official technical inquiry.'
     );
     y += 8;
 
@@ -164,8 +166,8 @@ export function BananaPowderPage() {
       'Store in cool, dry, dark conditions below 25°C (77°F) and < 60% RH. Hygroscopic material: heat-reseal or tightly clamp inner liner after opening.'
     );
     addRow('Shelf Life', '24 months from manufacturing date in unopened original barrier packaging.');
-    addRow('MOQ', 'Pilot evaluation runs from 25 kg; commercial bulk MOQ confirmed per quotation.');
-    addRow('Lead Time', 'Confirmed per order quantity, mesh specification, and export schedule upon inquiry.');
+    addRow('MOQ', 'Pilot runs confirmed from 25 kg; commercial bulk MOQ confirmed per quotation.');
+    addRow('Lead Time', 'Not fixed - confirmed per order quantity, mesh specification, and destination schedule upon inquiry.');
 
     // Footer on all pages
     const totalPages = doc.getNumberOfPages();
@@ -196,8 +198,8 @@ export function BananaPowderPage() {
     },
     {
       parameter: 'Water Activity (aw)',
-      specification: 'Pending analytical confirmation (available per Batch COA on request)',
-      method: 'Lot-specific verification',
+      specification: 'To be confirmed per lot COA upon request',
+      method: 'Not published in baseline spec',
       confirmed: false
     },
     {
@@ -259,7 +261,7 @@ export function BananaPowderPage() {
   return (
     <PageWrapper
       title="Banana Powder (100% Pure) | BhuviQ Nyra International"
-      description="Product specification dossier for BhuviQ Nyra 100% Pure Ripe Banana Powder: composition, physicochemical & microbiological standards, packaging, storage, and downloadable PDF specification."
+      description="Product specification dossier for BhuviQ Nyra 100% Pure Ripe Banana Powder: composition, peel exclusion, physicochemical & microbiological limits, packaging, storage, and downloadable PDF specification."
     >
       {/* Product Hero */}
       <section className="relative bg-[#102A43] text-white pt-32 pb-16 sm:pt-36 sm:pb-24 overflow-hidden">
@@ -291,7 +293,7 @@ export function BananaPowderPage() {
               <p className="font-mono text-sm sm:text-base text-[#FAF7F0]/80 italic mt-2">
                 Botanical Name: {CURRENT_PRODUCT.botanicalName}
               </p>
-              <p className="text-xs uppercase tracking-[0.25em] text-[#B89B5E] font-semibold mt-1.5">
+              <p className="text-xs uppercase tracking-[0.22em] text-[#B89B5E] font-semibold mt-1.5">
                 100% Pure Ripe Banana · Peel Excluded · Natural. Controlled. Consistent.
               </p>
             </div>
@@ -324,9 +326,9 @@ export function BananaPowderPage() {
             </div>
 
             {pdfDownloaded && (
-              <div className="inline-flex items-center gap-2 text-xs font-medium text-[#FAF7F0] bg-[#285943]/60 border border-[#B89B5E]/40 px-3.5 py-2 rounded-sm">
+              <div className="inline-flex items-center gap-2 text-xs font-medium text-[#FAF7F0] bg-[#285943]/70 border border-[#B89B5E]/40 px-3.5 py-2 rounded-sm">
                 <CheckCircle2 className="w-4 h-4 text-[#B89B5E] shrink-0" />
-                <span>Product Specification PDF downloaded (`BhuviQ-Nyra-Banana-Powder-Specification.pdf`).</span>
+                <span>Product Specification PDF downloaded (BhuviQ-Nyra-Banana-Powder-Specification.pdf).</span>
               </div>
             )}
           </div>
@@ -337,39 +339,41 @@ export function BananaPowderPage() {
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#285943]">
                   Confirmed Product Profile
                 </span>
-                <Badge variant="gold">Active B2B Supply</Badge>
+                <span className="font-mono text-[11px] uppercase tracking-wider font-semibold text-[#8F7236]">
+                  Active B2B Supply
+                </span>
               </div>
 
-              <div className="space-y-2.5 text-xs">
+              <dl className="space-y-2.5 text-xs">
                 <div className="flex justify-between gap-4 py-1.5 border-b border-[#102A43]/8">
-                  <span className="text-[#667085]">Botanical Origin:</span>
-                  <span className="font-semibold text-right">{CURRENT_PRODUCT.botanicalName}</span>
+                  <dt className="text-[#667085]">Botanical Origin:</dt>
+                  <dd className="font-semibold text-right">{CURRENT_PRODUCT.botanicalName}</dd>
                 </div>
                 <div className="flex justify-between gap-4 py-1.5 border-b border-[#102A43]/8">
-                  <span className="text-[#667085]">Banana Maturity:</span>
-                  <span className="font-semibold text-[#285943] text-right">Ripe (Controlled °Brix)</span>
+                  <dt className="text-[#667085]">Banana Maturity:</dt>
+                  <dd className="font-semibold text-[#285943] text-right">Ripe (Controlled °Brix)</dd>
                 </div>
                 <div className="flex justify-between gap-4 py-1.5 border-b border-[#102A43]/8">
-                  <span className="text-[#667085]">Composition:</span>
-                  <span className="font-semibold text-right">100% Pure Banana</span>
+                  <dt className="text-[#667085]">Composition:</dt>
+                  <dd className="font-semibold text-right">100% Pure Banana</dd>
                 </div>
                 <div className="flex justify-between gap-4 py-1.5 border-b border-[#102A43]/8">
-                  <span className="text-[#667085]">Banana Peel:</span>
-                  <span className="font-semibold text-right">Excluded (Hygienically Peeled)</span>
+                  <dt className="text-[#667085]">Banana Peel:</dt>
+                  <dd className="font-semibold text-right">Excluded (Hygienically Peeled)</dd>
                 </div>
                 <div className="flex justify-between gap-4 py-1.5 border-b border-[#102A43]/8">
-                  <span className="text-[#667085]">Moisture (Assayed):</span>
-                  <span className="font-mono tabular-nums font-semibold text-[#285943]">≤ 5.0% w/w</span>
+                  <dt className="text-[#667085]">Moisture (Assayed):</dt>
+                  <dd className="font-mono tabular-nums font-semibold text-[#285943]">≤ 5.0% w/w</dd>
                 </div>
                 <div className="flex justify-between gap-4 py-1.5 border-b border-[#102A43]/8">
-                  <span className="text-[#667085]">Particle Size:</span>
-                  <span className="font-mono tabular-nums font-semibold">60 to 100 Mesh (≥ 95% pass)</span>
+                  <dt className="text-[#667085]">Particle Size:</dt>
+                  <dd className="font-mono tabular-nums font-semibold">60 to 100 Mesh (≥ 95% pass)</dd>
                 </div>
                 <div className="flex justify-between gap-4 py-1.5">
-                  <span className="text-[#667085]">Shelf Life:</span>
-                  <span className="font-mono tabular-nums font-semibold">24 Months (Unopened)</span>
+                  <dt className="text-[#667085]">Shelf Life:</dt>
+                  <dd className="font-mono tabular-nums font-semibold">24 Months (Unopened)</dd>
                 </div>
-              </div>
+              </dl>
 
               <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button
@@ -394,13 +398,13 @@ export function BananaPowderPage() {
         </div>
       </section>
 
-      {/* Easy-to-Navigate Quick Anchor Bar */}
+      {/* Easy-to-Navigate Sticky Section Anchor Bar */}
       <nav
         aria-label="Product sections"
-        className="sticky top-[62px] sm:top-[68px] z-30 bg-[#FAF8F2]/95 backdrop-blur-md border-b border-[#102A43]/10"
+        className="sticky top-[60px] sm:top-[64px] xl:top-[72px] z-30 bg-[#FAF8F2]/95 backdrop-blur-md border-b border-[#102A43]/10"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 py-3 overflow-x-auto">
-          <div className="flex items-center gap-2 sm:gap-5 text-xs font-semibold uppercase tracking-wider text-[#102A43]">
+          <div className="flex items-center gap-2 sm:gap-4 text-xs font-semibold uppercase tracking-wider text-[#102A43]">
             {[
               { id: 'product-overview', label: '01. Overview & Composition' },
               { id: 'technical-specifications', label: '02. Technical Specs' },
@@ -410,8 +414,13 @@ export function BananaPowderPage() {
               <button
                 key={nav.id}
                 type="button"
-                onClick={() => scrollToSection(nav.id)}
-                className="px-2.5 py-1.5 rounded-sm hover:bg-[#102A43]/5 hover:text-[#285943] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                onClick={() => scrollToSection(nav.id as SectionId)}
+                className={cn(
+                  'px-3 py-1.5 rounded-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer',
+                  activeSection === nav.id
+                    ? 'bg-[#102A43] text-[#FAF7F0]'
+                    : 'hover:bg-[#102A43]/5 hover:text-[#285943]'
+                )}
               >
                 {nav.label}
               </button>
@@ -430,13 +439,53 @@ export function BananaPowderPage() {
       </nav>
 
       {/* 01. Product Overview, Maturity & Ingredient Composition */}
-      <section id="product-overview" className="scroll-mt-32 py-16 sm:py-20 bg-[#FAF8F2] text-[#17202A] border-b border-[#102A43]/10">
+      <section id="product-overview" className="scroll-mt-36 py-16 sm:py-20 bg-[#FAF8F2] text-[#17202A] border-b border-[#102A43]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <SectionHeading
             eyebrow="01. Ingredient Characterization"
             title="Product Overview & Composition"
             subtitle="Engineered from peeled ripe bananas for clean-label industrial formulations requiring authentic flavor, moisture binding, and botanical purity."
           />
+
+          {/* Quick Confirmed Facts Summary Row */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-5 bg-white border border-[#102A43]/12 rounded-sm">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-[#667085] block">
+                Banana Maturity
+              </span>
+              <span className="font-serif text-xl sm:text-2xl font-semibold text-[#102A43] mt-1 block">
+                Ripe
+              </span>
+              <span className="text-xs text-[#285943] mt-0.5 block">Controlled °Brix intake</span>
+            </div>
+            <div className="p-5 bg-white border border-[#102A43]/12 rounded-sm">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-[#667085] block">
+                Ingredient Composition
+              </span>
+              <span className="font-serif text-xl sm:text-2xl font-semibold text-[#102A43] mt-1 block">
+                100% Pure Banana
+              </span>
+              <span className="text-xs text-[#285943] mt-0.5 block">Zero carriers or fillers</span>
+            </div>
+            <div className="p-5 bg-white border border-[#102A43]/12 rounded-sm">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-[#667085] block">
+                Banana Peel
+              </span>
+              <span className="font-serif text-xl sm:text-2xl font-semibold text-[#102A43] mt-1 block">
+                Excluded
+              </span>
+              <span className="text-xs text-[#285943] mt-0.5 block">Hygienically peeled</span>
+            </div>
+            <div className="p-5 bg-white border border-[#102A43]/12 rounded-sm">
+              <span className="font-mono text-[11px] uppercase tracking-wider text-[#667085] block">
+                Moisture & Sieve
+              </span>
+              <span className="font-serif text-xl sm:text-2xl font-semibold text-[#102A43] tabular-nums mt-1 block">
+                ≤ 5.0% · 60–100 Mesh
+              </span>
+              <span className="text-xs text-[#285943] mt-0.5 block">Standardized release</span>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             {/* Visual & Composition Breakdown */}
@@ -477,7 +526,7 @@ export function BananaPowderPage() {
                   </div>
                   <div className="py-2.5 flex justify-between gap-4">
                     <dt className="text-[#667085] font-medium">Carriers, Fillers & Additives</dt>
-                    <dd className="text-[#102A43] font-semibold text-right">None (Zero Maltodextrin / Sulfites)</dd>
+                    <dd className="text-[#102A43] font-semibold text-right">None (Zero Maltodextrin / Additives)</dd>
                   </div>
                 </dl>
               </div>
@@ -488,7 +537,7 @@ export function BananaPowderPage() {
               <div className="p-6 sm:p-7 bg-white border border-[#102A43]/12 rounded-sm space-y-2 shadow-xs">
                 <span className="font-mono text-xs text-[#B89B5E] font-bold">01. MATURITY & ORIGIN</span>
                 <h3 className="font-serif text-2xl text-[#102A43] font-semibold">
-                  Ripe Banana Selection from Verified Clusters
+                  Ripe Banana Selection from Approved Suppliers
                 </h3>
                 <p className="text-sm text-[#667085] leading-relaxed font-light">
                   Sourced from approved food-grade suppliers across India and harvested at optimal ripeness. Incoming consignments are graded for maturity, size, variety, and °Brix soluble solids to preserve natural sweetness and volatile fruit aroma.
@@ -501,7 +550,7 @@ export function BananaPowderPage() {
                   Sanitary Washing & Hygienic Peeling
                 </h3>
                 <p className="text-sm text-[#667085] leading-relaxed font-light">
-                  Bananas undergo multi-stage ozonated water washing and hygienic peeling before puree homogenization—ensuring banana peel is completely excluded from the finished ingredient while removed biomass is routed to composting and co-product streams.
+                  Bananas undergo multi-stage ozonated water washing and hygienic peeling prior to puree homogenization—ensuring banana peel is completely excluded from the finished ingredient while removed agricultural biomass is routed to composting and co-product streams.
                 </p>
               </div>
 
@@ -511,7 +560,7 @@ export function BananaPowderPage() {
                   Precision Low-Temperature Dehydration
                 </h3>
                 <p className="text-sm text-[#667085] leading-relaxed font-light">
-                  Processed inside enclosed SS-316 stainless-steel food-contact pipelines using controlled low-temperature dehydration and calibrated milling. Produces a free-flowing, pale golden-ivory to light cream powder with zero artificial flavors or anti-caking agents.
+                  Manufactured inside enclosed SS-316 stainless-steel food-contact pipelines using controlled low-temperature dehydration and calibrated milling. Yields a free-flowing, pale golden-ivory to light cream powder with zero artificial flavors or carriers.
                 </p>
               </div>
             </div>
@@ -520,13 +569,13 @@ export function BananaPowderPage() {
       </section>
 
       {/* 02. Technical Specifications */}
-      <section id="technical-specifications" className="scroll-mt-32 py-16 sm:py-20 bg-[#F7F3EA] text-[#17202A] border-b border-[#102A43]/10">
+      <section id="technical-specifications" className="scroll-mt-36 py-16 sm:py-20 bg-[#F7F3EA] text-[#17202A] border-b border-[#102A43]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <SectionHeading
               eyebrow="02. Technical Data Sheet (TDS)"
               title="Technical Specifications"
-              subtitle="Verified baseline release parameters and transparent disclosure for lot-confirmed laboratory assays."
+              subtitle="Confirmed baseline specifications alongside clear status notices for parameters verified per batch Certificate of Analysis."
             />
 
             <Button
@@ -546,7 +595,7 @@ export function BananaPowderPage() {
               { id: 'all', label: 'All Specifications' },
               { id: 'physicochemical', label: 'Physicochemical' },
               { id: 'microbiological', label: 'Microbiological & Heavy Metals' },
-              { id: 'nutritional', label: 'Nutritional Information' }
+              { id: 'nutritional', label: 'Nutritional Values' }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -574,7 +623,7 @@ export function BananaPowderPage() {
                       Physicochemical Specifications
                     </h3>
                     <p className="text-xs text-[#FAF7F0]/75">
-                      Moisture, water activity, particle size distribution, colour, pH, and physical identity
+                      Moisture, water activity, particle size, colour, pH, bulk density, and composition purity
                     </p>
                   </div>
                   <span className="font-mono text-[11px] text-[#B89B5E] uppercase tracking-wider">
@@ -588,7 +637,7 @@ export function BananaPowderPage() {
                       <tr>
                         <th className="py-3 px-6 font-semibold">Parameter</th>
                         <th className="py-3 px-6 font-semibold">Specification</th>
-                        <th className="py-3 px-6 font-semibold sm:text-right">Test Method / Status</th>
+                        <th className="py-3 px-6 font-semibold sm:text-right">Method / Confirmation Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#102A43]/10">
@@ -623,7 +672,7 @@ export function BananaPowderPage() {
                         Microbiological Limits
                       </h3>
                       <p className="text-xs text-[#667085]">
-                        Assayed via validated ISO microbiological methodologies
+                        Confirmed baseline limits assayed via validated ISO methodologies
                       </p>
                     </div>
                     <ShieldCheck className="w-5 h-5 text-[#285943] shrink-0" />
@@ -666,16 +715,16 @@ export function BananaPowderPage() {
                       Heavy Metals
                     </h3>
                     <p className="text-xs text-[#667085] leading-relaxed">
-                      Batch heavy metal testing (Lead, Arsenic, Cadmium, and Mercury) is conducted via accredited external laboratory dossiers for export compliance.
+                      Batch heavy metal testing (Lead, Arsenic, Cadmium, and Mercury) is provided through accredited external laboratory dossiers for export compliance.
                     </p>
                   </div>
 
                   <div className="p-4 bg-[#FAF8F2] border border-[#102A43]/10 rounded-sm space-y-2 text-xs">
                     <span className="font-semibold text-[#102A43] block">
-                      Status: Lot-Specific COA Disclosure
+                      Confirmation Status: Lot-Specific COA
                     </span>
                     <p className="text-[#667085] leading-relaxed">
-                      Numeric heavy metal ppm limits are not generalized here and are issued directly on the lot Certificate of Analysis upon technical request.
+                      Numeric heavy metal limits are not published in this overview and are confirmed directly on the batch Certificate of Analysis upon request.
                     </p>
                   </div>
 
@@ -692,7 +741,7 @@ export function BananaPowderPage() {
               </div>
             )}
 
-            {/* C. Nutritional Information */}
+            {/* C. Nutritional Values */}
             {(specFilter === 'all' || specFilter === 'nutritional') && (
               <div className="bg-white border border-[#102A43]/15 rounded-sm p-6 sm:p-8 shadow-xs space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#102A43]/10 pb-4">
@@ -701,11 +750,11 @@ export function BananaPowderPage() {
                       Botanical Macronutrient & Mineral Profile
                     </span>
                     <h3 className="font-serif text-2xl font-semibold text-[#102A43]">
-                      Nutritional Information
+                      Nutritional Values
                     </h3>
                   </div>
                   <span className="text-xs font-medium px-3 py-1.5 bg-[#FAF8F2] border border-[#102A43]/15 rounded-sm text-[#102A43] self-start sm:self-auto">
-                    Per-100g Lab Assay: Pending Final Confirmation
+                    Per-100g Lab Values: Pending Official Confirmation
                   </span>
                 </div>
 
@@ -736,7 +785,7 @@ export function BananaPowderPage() {
                       <span>Quantitative Nutritional Panel (Per 100g)</span>
                     </div>
                     <p className="text-[#667085] leading-relaxed">
-                      Exact quantitative nutritional figures (kcal energy, total carbohydrates, sugars, dietary fiber, protein, fat, sodium, and potassium per 100g) are not generalized prior to lot verification and are provided upon request with our accredited laboratory test report.
+                      Exact numeric per-100g values (energy, carbohydrates, sugars, dietary fiber, protein, fat, sodium, and potassium) are not published without a verified lot assay and are provided upon request with our accredited laboratory report.
                     </p>
                   </div>
                 </div>
@@ -746,20 +795,20 @@ export function BananaPowderPage() {
         </div>
       </section>
 
-      {/* 03. Packaging Formats, Storage Instructions, Shelf Life, MOQ & Lead Time */}
-      <section id="packaging-logistics" className="scroll-mt-32 py-16 sm:py-20 bg-[#FAF8F2] text-[#17202A] border-b border-[#102A43]/10">
+      {/* 03. Packaging Formats, Storage, Shelf Life, MOQ & Lead Time */}
+      <section id="packaging-logistics" className="scroll-mt-36 py-16 sm:py-20 bg-[#FAF8F2] text-[#17202A] border-b border-[#102A43]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <SectionHeading
             eyebrow="03. Packaging & Commercial Logistics"
             title="Packaging, Storage, Shelf Life, MOQ & Lead Time"
-            subtitle="Export-grade moisture-barrier packaging and commercial supply terms engineered for global B2B fulfillment."
+            subtitle="Confirmed export-grade moisture-barrier packaging and supply parameters, with order-specific terms verified upon commercial inquiry."
           />
 
           {/* Packaging Formats */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#285943] font-semibold">
               <Package className="w-4 h-4" />
-              <span>Available Packaging Formats</span>
+              <span>Confirmed Packaging Formats</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -785,7 +834,7 @@ export function BananaPowderPage() {
             <div className="p-6 bg-white border border-[#102A43]/12 rounded-sm space-y-3 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-[#285943] font-bold">
-                  Storage Instructions
+                  Storage
                 </span>
                 <ThermometerSnowflake className="w-4 h-4 text-[#285943]" />
               </div>
@@ -823,7 +872,7 @@ export function BananaPowderPage() {
                 From 25 kg (Pilot)
               </p>
               <p className="text-xs text-[#667085] leading-relaxed">
-                Structured for pilot formulation runs starting from 25 kg; commercial bulk MOQ is confirmed per order quotation and packaging format.
+                Pilot evaluation runs are supported from 25 kg; commercial bulk MOQ is confirmed per order quotation and packaging selection.
               </p>
             </div>
 
@@ -838,7 +887,7 @@ export function BananaPowderPage() {
                 Confirmed Upon Inquiry
               </p>
               <p className="text-xs text-[#667085] leading-relaxed">
-                Dispatch and production lead times are confirmed per order volume, mesh particle specification, and destination freight schedule.
+                Fixed lead times are not generalized; production and dispatch schedules are confirmed per order volume, mesh size, and destination.
               </p>
             </div>
           </div>
@@ -880,7 +929,7 @@ export function BananaPowderPage() {
       </section>
 
       {/* 04. Formulation Applications Overview */}
-      <section id="applications" className="scroll-mt-32 py-16 sm:py-20 bg-[#F7F3EA] text-[#17202A] border-b border-[#102A43]/10">
+      <section id="applications" className="scroll-mt-36 py-16 sm:py-20 bg-[#F7F3EA] text-[#17202A] border-b border-[#102A43]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           <SectionHeading
             eyebrow="04. Integration Matrix"

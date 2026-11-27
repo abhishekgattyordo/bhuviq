@@ -38,6 +38,9 @@ export function RouterProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const hashIndex = path.indexOf('#');
+    const targetHash = hashIndex !== -1 ? path.slice(hashIndex + 1) : '';
+
     if (options.replace) {
       window.history.replaceState({}, '', path);
     } else {
@@ -46,7 +49,14 @@ export function RouterProvider({ children }: { children: ReactNode }) {
 
     setCurrentPath(path);
 
-    if (options.scrollToTop !== false) {
+    if (targetHash) {
+      setTimeout(() => {
+        const element = document.getElementById(targetHash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else if (options.scrollToTop !== false) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };

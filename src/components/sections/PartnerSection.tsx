@@ -1,52 +1,178 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { SectionHeading } from '../ui/SectionHeading';
+import React, { useState, useRef } from 'react';
 import { Button } from '../ui/Button';
-import { CheckCircle2, Sparkles, Building2, Globe, Mail, Phone, Package, Send, ShieldCheck } from 'lucide-react';
-import confetti from 'canvas-confetti';
-import { EnquiryFormData } from '../../types';
+import { cn } from '../../lib/utils';
+import {
+  CheckCircle2,
+  Building2,
+  Globe,
+  Mail,
+  Phone,
+  ShieldCheck,
+  Package,
+  FileText,
+  Layers,
+  Ship,
+  HelpCircle,
+  Handshake,
+  AlertCircle
+} from 'lucide-react';
+
+export type EnquiryTypeOption =
+  | 'Request a Sample'
+  | 'Request a Quotation'
+  | 'Bulk Enquiry'
+  | 'Export Enquiry'
+  | 'Ask a Technical Question'
+  | 'Business Partnership / Distribution Enquiry';
+
+interface EnquiryOptionCard {
+  type: EnquiryTypeOption;
+  summary: string;
+  defaultQuantity: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const ENQUIRY_OPTIONS: EnquiryOptionCard[] = [
+  {
+    type: 'Request a Sample',
+    summary: 'Order product samples for lab evaluation, formulation trials, and internal sensory assessment.',
+    defaultQuantity: 'Sample Pack (1 kg – 5 kg)',
+    icon: Package
+  },
+  {
+    type: 'Request a Quotation',
+    summary: 'Receive commercial pricing tailored to packaging format, volume, and delivery terms.',
+    defaultQuantity: 'Pilot Order (25 kg – 250 kg)',
+    icon: FileText
+  },
+  {
+    type: 'Bulk Enquiry',
+    summary: 'Discuss scheduled industrial B2B supply volumes for ongoing food or ingredient manufacturing.',
+    defaultQuantity: 'Bulk Supply (500 kg – 2,000 kg)',
+    icon: Layers
+  },
+  {
+    type: 'Export Enquiry',
+    summary: 'Inquire about export-grade barrier packaging, documentation, and international freight logistics.',
+    defaultQuantity: 'Export Volume (2 MT – 5 MT+)',
+    icon: Ship
+  },
+  {
+    type: 'Ask a Technical Question',
+    summary: 'Consult our team on particle size, moisture specifications, testing methods, or lot CoA scope.',
+    defaultQuantity: 'Not Applicable / Technical Review',
+    icon: HelpCircle
+  },
+  {
+    type: 'Business Partnership / Distribution Enquiry',
+    summary: 'Explore vendor, supplier, distributor, or market collaboration opportunities with our team.',
+    defaultQuantity: 'Custom / To Be Discussed',
+    icon: Handshake
+  }
+];
+
+interface CommercialFormState {
+  fullName: string;
+  companyName: string;
+  businessEmail: string;
+  phone: string;
+  country: string;
+  enquiryType: EnquiryTypeOption;
+  productInterest: string;
+  requiredQuantity: string;
+  message: string;
+}
+
+type FieldErrors = Partial<Record<keyof CommercialFormState, string>>;
 
 export function PartnerSection() {
-  const [formData, setFormData] = useState<EnquiryFormData>({
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const [formData, setFormData] = useState<CommercialFormState>({
     fullName: '',
     companyName: '',
-    country: '',
     businessEmail: '',
     phone: '',
-    productInterest: 'Banana Powder (100% Pure Standard)',
-    targetApplication: 'Food & Beverage',
-    quantityRequirement: 'Pilot Formulation (25kg - 100kg)',
+    country: '',
+    enquiryType: 'Request a Sample',
+    productInterest: 'Banana Powder (100% Pure)',
+    requiredQuantity: 'Sample Pack (1 kg – 5 kg)',
     message: ''
   });
 
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [serverError, setServerError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [submittedData, setSubmittedData] = useState<EnquiryFormData | null>(null);
+  const [submittedSnapshot, setSubmittedSnapshot] = useState<CommercialFormState | null>(null);
+
+  const handleSelectEnquiryOption = (option: EnquiryOptionCard) => {
+    setFormData((prev) => ({
+      ...prev,
+      enquiryType: option.type,
+      requiredQuantity: option.defaultQuantity
+    }));
+    setFieldErrors((prev) => ({ ...prev, enquiryType: undefined }));
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  const validateForm = (state: CommercialFormState): FieldErrors => {
+    const errors: FieldErrors = {};
+
+    if (!state.fullName.trim() || state.fullName.trim().length < 2) {
+      errors.fullName = 'Please enter your full name (at least 2 characters).';
+    }
+    if (!state.companyName.trim()) {
+      errors.companyName = 'Please enter your company or organization name.';
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!state.businessEmail.trim() || !emailPattern.test(state.businessEmail.trim())) {
+      errors.businessEmail = 'Please enter a valid email address.';
+    }
+    if (state.phone.trim()) {
+      const digitsOnly = state.phone.replace(/\D/g, '');
+      if (digitsOnly.length < 7 || digitsOnly.length > 16) {
+        errors.phone = 'Please enter a valid phone number (7–16 digits).';
+      }
+    }
+    if (!state.country.trim()) {
+      errors.country = 'Please specify your country.';
+    }
+    if (!state.enquiryType) {
+      errors.enquiryType = 'Please select an enquiry type.';
+    }
+    if (!state.productInterest.trim()) {
+      errors.productInterest = 'Please select a product of interest.';
+    }
+    if (!state.message.trim() || state.message.trim().length < 10) {
+      errors.message = 'Please share your requirements or question (at least 10 characters).';
+    }
+
+    return errors;
+  };
+
+  const handleFieldChange = <K extends keyof CommercialFormState>(
+    field: K,
+    value: CommercialFormState[K]
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+    if (serverError) {
+      setServerError('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage('');
+    setServerError('');
 
-    // Pre-flight check
-    if (!formData.fullName.trim()) {
-      setErrorMessage('Name is required');
-      return;
-    }
-    if (!formData.companyName.trim()) {
-      setErrorMessage('Company name is required');
-      return;
-    }
-    if (!formData.country.trim()) {
-      setErrorMessage('Country is required');
-      return;
-    }
-    if (!formData.businessEmail.trim()) {
-      setErrorMessage('Email is required');
-      return;
-    }
-    if (!formData.message.trim()) {
-      setErrorMessage('Message is required. Please provide your formulation requirements or inquiry details.');
+    const errors = validateForm(formData);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -59,314 +185,468 @@ export function PartnerSection() {
         country: formData.country.trim(),
         email: formData.businessEmail.trim(),
         phone: formData.phone.trim() || undefined,
-        product: formData.productInterest || undefined,
-        application: formData.targetApplication || undefined,
-        quantity: formData.quantityRequirement || undefined,
-        message: formData.message.trim(),
+        product: formData.productInterest,
+        application: formData.enquiryType,
+        quantity: formData.requiredQuantity.trim() || 'To Be Discussed',
+        message: `[${formData.enquiryType}] ${formData.message.trim()}`
       };
 
       const response = await fetch('/api/enquiries', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setErrorMessage(data.message || 'Something went wrong. Please try again.');
+        setServerError(data.message || 'Unable to submit enquiry. Please review your details and try again.');
         setIsLoading(false);
         return;
       }
 
-      setSubmittedData({ ...formData });
+      setSubmittedSnapshot({ ...formData });
       setIsSubmitted(true);
       setIsLoading(false);
-
-      try {
-        confetti({
-          particleCount: 90,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ['#102A43', '#285943', '#B89B5E']
-        });
-      } catch {
-        // Fallback
-      }
     } catch (err) {
-      console.error('Error submitting enquiry:', err);
-      setErrorMessage('Something went wrong. Please try again.');
+      console.error('Error submitting commercial enquiry:', err);
+      setServerError('Connection error while submitting your enquiry. Please try again.');
       setIsLoading(false);
     }
   };
 
   const handleReset = () => {
     setIsSubmitted(false);
-    setSubmittedData(null);
+    setSubmittedSnapshot(null);
+    setFieldErrors({});
+    setServerError('');
     setFormData({
       fullName: '',
       companyName: '',
-      country: '',
       businessEmail: '',
       phone: '',
-      productInterest: 'Banana Powder (100% Pure Standard 60 to 100 Mesh)',
-      targetApplication: 'Food & Beverage (Bakery, Snacks, Beverages)',
-      quantityRequirement: 'Commercial Supply (500kg - 2,000kg)',
+      country: '',
+      enquiryType: 'Request a Sample',
+      productInterest: 'Banana Powder (100% Pure)',
+      requiredQuantity: 'Sample Pack (1 kg – 5 kg)',
       message: ''
     });
   };
 
   return (
-    <section id="partner-section" className="py-24 sm:py-32 bg-[#102A43] text-white relative overflow-hidden border-t border-[#B89B5E]/30">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#FAF7F0_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none" />
-      <div className="absolute -bottom-24 right-0 w-[500px] h-[500px] bg-[#285943]/30 rounded-full blur-3xl pointer-events-none" />
+    <section
+      id="commercial-enquiry"
+      className="py-20 sm:py-28 bg-[#102A43] text-white relative overflow-hidden border-t border-[#B89B5E]/30"
+    >
+      <div id="partner-section" className="sr-only" aria-hidden="true" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-14">
+        {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#B89B5E] text-xs font-semibold uppercase tracking-widest border border-[#B89B5E]/30">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>B2B Commercial Engagement</span>
+          <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.22em] text-[#B89B5E] font-semibold">
+            <span>Commercial Enquiry</span>
+            <span aria-hidden="true">·</span>
+            <span className="text-[#FAF7F0]/80">B2B &amp; Technical Desk</span>
           </div>
-          <h2 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-[#FAF7F0] font-normal leading-tight">
-            Let's Create Something From Nature.
+
+          <h2 className="font-serif text-3xl sm:text-5xl lg:text-[54px] text-[#FAF7F0] font-normal leading-[1.1] text-balance">
+            Direct Commercial &amp; Ingredient Enquiries
           </h2>
+
           <p className="text-base sm:text-lg text-[#FAF7F0]/80 font-light leading-relaxed max-w-2xl mx-auto">
-            Tell us what you're looking for. Our team will work with you to understand your ingredient, particle distribution, and application requirements.
+            Select an enquiry type below and complete the form with your commercial, sample, export, technical, or partnership requirements.
           </p>
         </div>
 
-        {/* Form Box */}
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="max-w-4xl mx-auto bg-[#FAF8F2] text-[#17202A] rounded-sm p-8 sm:p-12 border border-[#B89B5E]/40 shadow-2xl"
-        >
-          {isSubmitted ? (
-            <div className="text-center py-10 space-y-6 animate-in fade-in duration-300">
-              <div className="w-20 h-20 rounded-full bg-[#285943]/10 text-[#285943] border border-[#285943]/30 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-10 h-10" />
-              </div>
-              <div className="space-y-3 max-w-lg mx-auto">
-                <h3 className="font-serif text-3xl sm:text-4xl text-[#102A43] font-semibold">
-                  Thank You
-                </h3>
-                <p className="text-base text-[#285943] font-medium leading-relaxed">
-                  Your enquiry has been received successfully. Our team will get back to you.
-                </p>
-                <p className="text-xs text-[#667085] leading-relaxed">
-                  A confirmation has been logged for <strong className="text-[#102A43]">{submittedData?.businessEmail || formData.businessEmail}</strong>. Our corporate account manager will review your technical specifications.
-                </p>
+        {/* 6 Selectable Enquiry Option Cards */}
+        <div className="space-y-4">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#B89B5E] font-semibold text-center">
+            Select Enquiry Type
+          </p>
 
-                <div className="p-4 bg-white border border-[#102A43]/10 rounded-sm text-left text-xs space-y-2 mt-4">
-                  <div className="flex justify-between border-b border-[#102A43]/5 pb-1.5">
-                    <span className="text-[#667085]">Company / Region:</span>
-                    <span className="font-medium text-[#102A43]">{submittedData?.companyName || formData.companyName} ({submittedData?.country || formData.country})</span>
+          <div
+            role="radiogroup"
+            aria-label="Commercial enquiry options"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            {ENQUIRY_OPTIONS.map((option) => {
+              const Icon = option.icon;
+              const isSelected = formData.enquiryType === option.type;
+
+              return (
+                <button
+                  key={option.type}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => handleSelectEnquiryOption(option)}
+                  className={cn(
+                    'text-left p-5 rounded-sm border transition-all duration-200 cursor-pointer flex flex-col justify-between gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B89B5E]',
+                    isSelected
+                      ? 'bg-[#1D3B58] border-[#B89B5E] shadow-lg'
+                      : 'bg-white/[0.04] border-white/15 hover:bg-white/[0.08] hover:border-white/35'
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div
+                      className={cn(
+                        'w-10 h-10 rounded-sm flex items-center justify-center border shrink-0 transition-colors',
+                        isSelected
+                          ? 'bg-[#B89B5E] text-[#102A43] border-[#B89B5E]'
+                          : 'bg-[#102A43] text-[#B89B5E] border-white/15'
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span
+                      className={cn(
+                        'font-mono text-[11px] uppercase tracking-wider font-semibold',
+                        isSelected ? 'text-[#B89B5E]' : 'text-white/50'
+                      )}
+                    >
+                      {isSelected ? 'Selected' : 'Select'}
+                    </span>
                   </div>
-                  <div className="flex justify-between border-b border-[#102A43]/5 pb-1.5">
-                    <span className="text-[#667085]">Requirement Volume:</span>
-                    <span className="text-[#285943] font-medium">{submittedData?.quantityRequirement || formData.quantityRequirement}</span>
+
+                  <div className="space-y-1">
+                    <h3 className="font-serif text-xl font-semibold text-[#FAF7F0] leading-snug">
+                      {option.type}
+                    </h3>
+                    <p className="text-xs text-[#FAF7F0]/75 leading-relaxed font-light">
+                      {option.summary}
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#667085]">Next Step:</span>
-                    <span className="text-[#102A43]">Direct Technical Dossier & Quotation</span>
-                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Commercial Enquiry Form Container */}
+        <div className="max-w-4xl mx-auto bg-[#FAF8F2] text-[#17202A] rounded-sm p-6 sm:p-10 lg:p-12 border border-[#B89B5E]/40 shadow-2xl">
+          {isSubmitted && submittedSnapshot ? (
+            <div className="text-center py-8 space-y-6">
+              <div className="w-16 h-16 rounded-full bg-[#285943]/10 text-[#285943] border border-[#285943]/30 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-2 max-w-xl mx-auto">
+                <span className="font-mono text-xs uppercase tracking-widest text-[#285943] font-semibold block">
+                  Enquiry Logged
+                </span>
+                <h3 className="font-serif text-3xl sm:text-4xl text-[#102A43] font-semibold">
+                  Thank You, {submittedSnapshot.fullName}
+                </h3>
+                <p className="text-sm sm:text-base text-[#667085] leading-relaxed">
+                  Your <strong className="text-[#102A43]">{submittedSnapshot.enquiryType}</strong> has been received. Our commercial and technical desk will respond to{' '}
+                  <strong className="text-[#102A43]">{submittedSnapshot.businessEmail}</strong>.
+                </p>
+              </div>
+
+              <div className="max-w-lg mx-auto p-5 bg-white border border-[#102A43]/10 rounded-sm text-left text-xs space-y-2.5">
+                <div className="flex justify-between gap-4 border-b border-[#102A43]/10 pb-2">
+                  <span className="text-[#667085]">Enquiry Type</span>
+                  <span className="font-semibold text-[#102A43] text-right">
+                    {submittedSnapshot.enquiryType}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4 border-b border-[#102A43]/10 pb-2">
+                  <span className="text-[#667085]">Company / Country</span>
+                  <span className="font-medium text-[#102A43] text-right">
+                    {submittedSnapshot.companyName} ({submittedSnapshot.country})
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4 border-b border-[#102A43]/10 pb-2">
+                  <span className="text-[#667085]">Product of Interest</span>
+                  <span className="font-medium text-[#285943] text-right">
+                    {submittedSnapshot.productInterest}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#667085]">Required Quantity</span>
+                  <span className="font-mono text-[#102A43] text-right">
+                    {submittedSnapshot.requiredQuantity || 'To Be Discussed'}
+                  </span>
                 </div>
               </div>
 
-              <div className="pt-4">
-                <Button variant="primary" onClick={handleReset}>
+              <div className="pt-2">
+                <Button variant="primary" size="md" onClick={handleReset}>
                   Submit Another Enquiry
                 </Button>
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="border-b border-[#102A43]/10 pb-4 flex items-center justify-between">
+            <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-6">
+              <div className="border-b border-[#102A43]/10 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="font-serif text-2xl text-[#102A43] font-semibold">
-                    Commercial & Technical Enquiry Form
+                  <h3 className="font-serif text-2xl sm:text-3xl text-[#102A43] font-semibold">
+                    Commercial Enquiry Form
                   </h3>
-                  <p className="text-xs text-[#667085] mt-0.5">
-                    Please provide detailed parameters to expedite technical review.
+                  <p className="text-xs sm:text-sm text-[#667085] mt-0.5">
+                    Fields marked with * are required.
                   </p>
                 </div>
-                <span className="text-[10px] font-mono text-[#285943] bg-[#285943]/10 px-2 py-1 rounded">
-                  B2B Direct
+                <span className="font-mono text-xs text-[#285943] font-semibold">
+                  {formData.enquiryType}
                 </span>
               </div>
 
-              {errorMessage && (
-                <div className="p-3.5 bg-red-50 border border-red-200 text-xs text-red-700 rounded-sm font-medium">
-                  {errorMessage}
+              {serverError && (
+                <div
+                  role="alert"
+                  className="p-3.5 bg-red-50 border border-red-200 text-xs text-red-700 rounded-sm font-medium flex items-center gap-2"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{serverError}</span>
                 </div>
               )}
 
-              {/* Grid Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* Full Name */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Your Name *
+                  <label
+                    htmlFor="enquiry-full-name"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                  >
+                    Full Name *
                   </label>
                   <input
+                    id="enquiry-full-name"
                     type="text"
                     required
+                    aria-invalid={Boolean(fieldErrors.fullName)}
                     value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    placeholder="e.g. Marcus Richter"
-                    className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:border-[#102A43]"
+                    onChange={(e) => handleFieldChange('fullName', e.target.value)}
+                    placeholder="Enter your full name"
+                    className={cn(
+                      'w-full px-4 py-3 bg-white border rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:ring-2 focus:ring-[#102A43]/20',
+                      fieldErrors.fullName ? 'border-red-500' : 'border-[#102A43]/20 focus:border-[#102A43]'
+                    )}
                   />
+                  {fieldErrors.fullName && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.fullName}</p>
+                  )}
                 </div>
 
                 {/* Company Name */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
+                  <label
+                    htmlFor="enquiry-company-name"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                  >
                     Company Name *
                   </label>
                   <div className="relative">
                     <input
+                      id="enquiry-company-name"
                       type="text"
                       required
+                      aria-invalid={Boolean(fieldErrors.companyName)}
                       value={formData.companyName}
-                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      placeholder="e.g. Apex Nutrition AG"
-                      className="w-full pl-4 pr-10 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:border-[#102A43]"
+                      onChange={(e) => handleFieldChange('companyName', e.target.value)}
+                      placeholder="Enter your company name"
+                      className={cn(
+                        'w-full pl-4 pr-10 py-3 bg-white border rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:ring-2 focus:ring-[#102A43]/20',
+                        fieldErrors.companyName ? 'border-red-500' : 'border-[#102A43]/20 focus:border-[#102A43]'
+                      )}
                     />
                     <Building2 className="w-4 h-4 text-[#667085] absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
+                  {fieldErrors.companyName && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.companyName}</p>
+                  )}
+                </div>
+
+                {/* Email Address */}
+                <div>
+                  <label
+                    htmlFor="enquiry-email"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                  >
+                    Email Address *
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="enquiry-email"
+                      type="email"
+                      required
+                      aria-invalid={Boolean(fieldErrors.businessEmail)}
+                      value={formData.businessEmail}
+                      onChange={(e) => handleFieldChange('businessEmail', e.target.value)}
+                      placeholder="name@company.com"
+                      className={cn(
+                        'w-full pl-4 pr-10 py-3 bg-white border rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:ring-2 focus:ring-[#102A43]/20',
+                        fieldErrors.businessEmail ? 'border-red-500' : 'border-[#102A43]/20 focus:border-[#102A43]'
+                      )}
+                    />
+                    <Mail className="w-4 h-4 text-[#667085] absolute right-3.5 top-3.5 pointer-events-none" />
+                  </div>
+                  {fieldErrors.businessEmail && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.businessEmail}</p>
+                  )}
+                </div>
+
+                {/* Phone Number */}
+                <div>
+                  <label
+                    htmlFor="enquiry-phone"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                  >
+                    Phone Number
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="enquiry-phone"
+                      type="tel"
+                      aria-invalid={Boolean(fieldErrors.phone)}
+                      value={formData.phone}
+                      onChange={(e) => handleFieldChange('phone', e.target.value)}
+                      placeholder="+91 98765 43210"
+                      className={cn(
+                        'w-full pl-4 pr-10 py-3 bg-white border rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:ring-2 focus:ring-[#102A43]/20',
+                        fieldErrors.phone ? 'border-red-500' : 'border-[#102A43]/20 focus:border-[#102A43]'
+                      )}
+                    />
+                    <Phone className="w-4 h-4 text-[#667085] absolute right-3.5 top-3.5 pointer-events-none" />
+                  </div>
+                  {fieldErrors.phone && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>
+                  )}
                 </div>
 
                 {/* Country */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Country / Region *
+                  <label
+                    htmlFor="enquiry-country"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                  >
+                    Country *
                   </label>
                   <div className="relative">
                     <input
+                      id="enquiry-country"
                       type="text"
                       required
+                      aria-invalid={Boolean(fieldErrors.country)}
                       value={formData.country}
-                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                      placeholder="e.g. Switzerland, United States, Japan"
-                      className="w-full pl-4 pr-10 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:border-[#102A43]"
+                      onChange={(e) => handleFieldChange('country', e.target.value)}
+                      placeholder="e.g. India, UAE, Germany, United States"
+                      className={cn(
+                        'w-full pl-4 pr-10 py-3 bg-white border rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:ring-2 focus:ring-[#102A43]/20',
+                        fieldErrors.country ? 'border-red-500' : 'border-[#102A43]/20 focus:border-[#102A43]'
+                      )}
                     />
                     <Globe className="w-4 h-4 text-[#667085] absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
+                  {fieldErrors.country && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.country}</p>
+                  )}
                 </div>
 
-                {/* Business Email */}
+                {/* Enquiry Type */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Business Email *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="email"
-                      required
-                      value={formData.businessEmail}
-                      onChange={(e) => setFormData({ ...formData, businessEmail: e.target.value })}
-                      placeholder="marcus@apexnutrition.ch"
-                      className="w-full pl-4 pr-10 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:border-[#102A43]"
-                    />
-                    <Mail className="w-4 h-4 text-[#667085] absolute right-3.5 top-3.5 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Phone / Mobile
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+41 22 123 4567"
-                      className="w-full pl-4 pr-10 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:border-[#102A43]"
-                    />
-                    <Phone className="w-4 h-4 text-[#667085] absolute right-3.5 top-3.5 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Ingredient / Product */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Ingredient / Product
+                  <label
+                    htmlFor="enquiry-type"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                  >
+                    Enquiry Type *
                   </label>
                   <select
+                    id="enquiry-type"
+                    required
+                    value={formData.enquiryType}
+                    onChange={(e) =>
+                      handleFieldChange('enquiryType', e.target.value as EnquiryTypeOption)
+                    }
+                    className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] focus:outline-none focus:border-[#102A43] focus:ring-2 focus:ring-[#102A43]/20"
+                  >
+                    {ENQUIRY_OPTIONS.map((opt) => (
+                      <option key={opt.type} value={opt.type}>
+                        {opt.type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Product of Interest */}
+                <div>
+                  <label
+                    htmlFor="enquiry-product"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                  >
+                    Product of Interest *
+                  </label>
+                  <select
+                    id="enquiry-product"
+                    required
                     value={formData.productInterest}
-                    onChange={(e) => setFormData({ ...formData, productInterest: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] focus:outline-none focus:border-[#102A43]"
+                    onChange={(e) => handleFieldChange('productInterest', e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] focus:outline-none focus:border-[#102A43] focus:ring-2 focus:ring-[#102A43]/20"
                   >
-                    <option value="Banana Powder (100% Pure Standard 60 to 100 Mesh)">Banana Powder (100% Pure Standard 60 to 100 Mesh)</option>
-                    <option value="Banana Powder (Fine Micronized 100+ Mesh)">Banana Powder (Fine Micronized 100+ Mesh)</option>
-                    <option value="Custom Agricultural Co-Product Inquiry">Custom Agricultural Co-Product Inquiry</option>
-                    <option value="Future Ingredient Platform Collaboration">Future Ingredient Platform Collaboration</option>
+                    <option value="Banana Powder (100% Pure)">Banana Powder (100% Pure)</option>
+                    <option value="Food-Grade Banana Powder">Food-Grade Banana Powder</option>
+                    <option value="Cosmetic-Grade Banana Powder">Cosmetic-Grade Banana Powder</option>
+                    <option value="Pharmaceutical-Grade Banana Powder">Pharmaceutical-Grade Banana Powder</option>
+                    <option value="TerraVance — Agricultural Value & Food-Grade Ingredients">
+                      TerraVance — Agricultural Value &amp; Food-Grade Ingredients
+                    </option>
+                    <option value="Other / General Botanical Inquiry">Other / General Botanical Inquiry</option>
                   </select>
                 </div>
 
-                {/* Application */}
+                {/* Required Quantity */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Application
-                  </label>
-                  <select
-                    value={formData.targetApplication}
-                    onChange={(e) => setFormData({ ...formData, targetApplication: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] focus:outline-none focus:border-[#102A43]"
+                  <label
+                    htmlFor="enquiry-quantity"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
                   >
-                    <option value="Food & Beverage (Bakery, Snacks, Beverages)">Food & Beverage (Bakery, Snacks, Beverages)</option>
-                    <option value="Nutrition & Functional Supplements">Nutrition & Functional Supplements</option>
-                    <option value="Wellness & Gut Health Formulas">Wellness & Gut Health Formulas</option>
-                    <option value="Beauty & Clean Cosmetics">Beauty & Clean Cosmetics</option>
-                    <option value="Industrial Food Processing Premixes">Industrial Food Processing Premixes</option>
-                  </select>
-                </div>
-
-                {/* Quantity Requirement */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                    Quantity Requirement
+                    Required Quantity
                   </label>
-                  <select
-                    value={formData.quantityRequirement}
-                    onChange={(e) => setFormData({ ...formData, quantityRequirement: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] focus:outline-none focus:border-[#102A43]"
-                  >
-                    <option value="Pilot Batch (25kg - 250kg)">Pilot Batch (25kg - 250kg)</option>
-                    <option value="Commercial Supply (500kg - 2,000kg)">Commercial Supply (500kg - 2,000kg)</option>
-                    <option value="Full Container / Annual Supply Contract (5MT+)">Full Container / Annual Supply Contract (5MT+)</option>
-                    <option value="Custom Contract Formulation">Custom Contract Formulation</option>
-                  </select>
+                  <input
+                    id="enquiry-quantity"
+                    type="text"
+                    value={formData.requiredQuantity}
+                    onChange={(e) => handleFieldChange('requiredQuantity', e.target.value)}
+                    placeholder="e.g. 5 kg sample, 500 kg, 2 MT"
+                    className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:border-[#102A43] focus:ring-2 focus:ring-[#102A43]/20"
+                  />
                 </div>
               </div>
 
-              {/* Message */}
+              {/* Message / Additional Requirements */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5">
-                  Message / Formulation Specifications *
+                <label
+                  htmlFor="enquiry-message"
+                  className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                >
+                  Message / Additional Requirements *
                 </label>
                 <textarea
-                  rows={3}
+                  id="enquiry-message"
+                  rows={4}
                   required
+                  aria-invalid={Boolean(fieldErrors.message)}
                   value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Share details on target product, regulatory standards required, or preferred delivery timeline..."
-                  className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:border-[#102A43]"
+                  onChange={(e) => handleFieldChange('message', e.target.value)}
+                  placeholder="Share details on target application, packaging preference, delivery destination, or technical questions..."
+                  className={cn(
+                    'w-full px-4 py-3 bg-white border rounded-sm text-sm text-[#17202A] placeholder-[#667085]/60 focus:outline-none focus:ring-2 focus:ring-[#102A43]/20',
+                    fieldErrors.message ? 'border-red-500' : 'border-[#102A43]/20 focus:border-[#102A43]'
+                  )}
                 />
+                {fieldErrors.message && (
+                  <p className="mt-1 text-xs text-red-600">{fieldErrors.message}</p>
+                )}
               </div>
 
-              {/* Submission Button */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Submit Bar */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#102A43]/10">
                 <div className="flex items-center gap-2 text-xs text-[#667085]">
-                  <ShieldCheck className="w-4 h-4 text-[#285943]" />
-                  <span>B2B Commercial Confidentiality Guaranteed</span>
+                  <ShieldCheck className="w-4 h-4 text-[#285943] shrink-0" />
+                  <span>Confidential B2B commercial and technical handling</span>
                 </div>
 
                 <Button
@@ -375,14 +655,14 @@ export function PartnerSection() {
                   size="lg"
                   isLoading={isLoading}
                   showArrow={!isLoading}
-                  className="w-full sm:w-auto tracking-widest text-xs font-bold uppercase min-w-[160px]"
+                  className="w-full sm:w-auto tracking-wider text-xs font-bold uppercase min-w-[200px]"
                 >
-                  {isLoading ? 'SENDING...' : 'SEND ENQUIRY'}
+                  {isLoading ? 'Submitting...' : 'Submit Enquiry'}
                 </Button>
               </div>
             </form>
           )}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

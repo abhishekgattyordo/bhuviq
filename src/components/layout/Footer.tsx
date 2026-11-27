@@ -163,21 +163,21 @@ export function Footer() {
         </div>
 
         {/* Bottom Copyright and Legal */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#FAF7F0]/50 font-light">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#FAF7F0]/60 font-light">
           <div>
-            © {COMPANY_INFO.establishedYear} BhuviQ Nyra International. All rights reserved.
+            © {COMPANY_INFO.establishedYear} Bhuvi Q Nyra International Private Limited. All rights reserved.
           </div>
-          <div className="flex items-center gap-6">
-            <span className="hover:text-white/80 cursor-pointer transition-colors" onClick={() => navigate('/contact')}>
-              Legal Notice
-            </span>
-            <span className="hover:text-white/80 cursor-pointer transition-colors" onClick={() => navigate('/science-quality')}>
-              Quality Standard
-            </span>
-            <span className="hover:text-white/80 cursor-pointer transition-colors" onClick={() => navigate('/partner-with-us')}>
-              B2B Portal
-            </span>
-          </div>
+          <nav aria-label="Trust and legal links" className="flex flex-wrap items-center justify-center gap-6">
+            {FOOTER_LINKS.legal.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="hover:text-white transition-colors"
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>

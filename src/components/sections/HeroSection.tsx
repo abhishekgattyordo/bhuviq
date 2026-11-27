@@ -74,13 +74,11 @@ export function HeroSection() {
       >
         {/* Official Company Logo Only */}
         <motion.div variants={itemVariants} className="flex justify-center">
-          <div className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl bg-[#FAF7F0] p-3 shadow-2xl ring-1 ring-[#B89B5E]/45 flex items-center justify-center">
-            <img
-              src="/favicon.svg"
-              alt="Official company logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <img
+            src="/images/logo/44058.png"
+            alt="Official company logo"
+            className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.35)]"
+          />
         </motion.div>
 
         {/* Main Display Heading & Subtitle */}

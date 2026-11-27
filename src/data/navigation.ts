@@ -13,6 +13,7 @@ export const NAV_ITEMS: NavItem[] = [
   { name: "Applications", href: "/applications", description: "Food, Nutrition, Wellness & Personal Care" },
   { name: "Sustainability", href: "/sustainability", description: "Responsible Sourcing & Zero-Waste Ethos" },
   { name: "Manufacturing", href: "/manufacturing", description: "Controlled Processing & Cleanroom Standards" },
+  { name: "TerraVance", href: "/terravance", description: "Agricultural Value Enhancement & Distribution" },
   { name: "Insights", href: "/insights", description: "Articles, Trends & Ingredient Science" },
 ];
 
@@ -37,8 +38,8 @@ export const FOOTER_LINKS = {
     { name: "Global Supply Inquiries", href: "/partner-with-us" }
   ],
   legal: [
-    { name: "Privacy Policy", href: "#privacy" },
-    { name: "Terms of Supply", href: "#terms" },
-    { name: "Specification Disclaimer", href: "#disclaimer" }
+    { name: "Trust & Compliance", href: "/#trust-compliance" },
+    { name: "Privacy Policy", href: "/privacy-policy" },
+    { name: "Terms & Conditions", href: "/terms-and-conditions" }
   ]
 };

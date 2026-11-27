@@ -15,6 +15,9 @@ import { ContactPage } from './pages/ContactPage';
 import { PartnerWithUsPage } from './pages/PartnerWithUsPage';
 import { AdminEnquiriesPage } from './pages/AdminEnquiriesPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { TerraVancePage } from './pages/TerraVancePage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsConditionsPage } from './pages/TermsConditionsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 function AppContent() {
@@ -65,6 +68,15 @@ function AppContent() {
   }
   if (path === '/settings' || path === '/admin/settings') {
     return <SettingsPage />;
+  }
+  if (path === '/terravance' || path === '/terra-vance') {
+    return <TerraVancePage />;
+  }
+  if (path === '/privacy-policy' || path === '/privacy') {
+    return <PrivacyPolicyPage />;
+  }
+  if (path === '/terms-and-conditions' || path === '/terms') {
+    return <TermsConditionsPage />;
   }
 
   return <NotFoundPage />;
