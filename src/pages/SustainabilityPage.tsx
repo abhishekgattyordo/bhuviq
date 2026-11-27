@@ -68,8 +68,9 @@ export function SustainabilityPage() {
       <section className="relative bg-[#1C3F30] text-white pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=2000&q=80"
-            alt="Lush agricultural plantation"
+            src="/images/terrasynch_farm_supply_traceability_1795783124890.jpg"
+            alt="Sustainable tropical banana plantation and traceable farming"
+            referrerPolicy="no-referrer"
             className="w-full h-full object-cover opacity-25 mix-blend-luminosity"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1C3F30] via-[#1C3F30]/85 to-[#1C3F30]/60" />

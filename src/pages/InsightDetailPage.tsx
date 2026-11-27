@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { ARTICLES } from '../data/insights';
-import { Clock, ArrowLeft, ArrowRight, Share2, Sparkles, Package, CheckCircle2 } from 'lucide-react';
+import { Clock, ArrowLeft, ArrowRight, Share2, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { useRouter } from '../context/RouterContext';
 
@@ -11,6 +11,7 @@ interface InsightDetailPageProps {
 
 export function InsightDetailPage({ slug }: InsightDetailPageProps) {
   const { navigate } = useRouter();
+  const [shareCopied, setShareCopied] = useState(false);
 
   const article = ARTICLES.find((a) => a.slug === slug) || ARTICLES[0];
   const relatedArticles = ARTICLES.filter((a) => a.id !== article.id).slice(0, 3);
@@ -22,9 +23,11 @@ export function InsightDetailPage({ slug }: InsightDetailPageProps) {
         text: article.summary,
         url: window.location.href,
       }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Article link copied to clipboard.');
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 3000);
+      }).catch(() => {});
     }
   };
 
@@ -76,11 +79,11 @@ export function InsightDetailPage({ slug }: InsightDetailPageProps) {
 
             <button
               onClick={handleShare}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center gap-1.5 text-xs font-mono cursor-pointer"
+              className="px-3 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center gap-1.5 text-xs font-mono cursor-pointer"
               aria-label="Share article"
             >
               <Share2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Share</span>
+              <span className="hidden sm:inline">{shareCopied ? 'Link Copied' : 'Share'}</span>
             </button>
           </div>
         </div>
@@ -92,11 +95,12 @@ export function InsightDetailPage({ slug }: InsightDetailPageProps) {
           <img
             src={article.heroImage}
             alt={article.title}
+            referrerPolicy="no-referrer"
             className="w-full h-full object-cover"
             loading="lazy"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1200&q=80";
+              target.src = "/images/insight_banana_pure_ingredient_1790839554597.jpg";
             }}
           />
         </div>

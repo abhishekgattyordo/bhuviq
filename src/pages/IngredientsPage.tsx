@@ -5,11 +5,12 @@ import { CURRENT_PRODUCT, FUTURE_CATEGORIES } from '../data/products';
 import { APPLICATION_MATRIX } from '../data/applications';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { Package, Sparkles, FileText, CheckCircle2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { FileText, Download } from 'lucide-react';
 import { useRouter } from '../context/RouterContext';
+import { downloadProductSpecificationPdf } from '../lib/pdfDocuments';
 
 export function IngredientsPage() {
-  const { openSpecSheetModal, navigate } = useRouter();
+  const { openSpecSheetModal, navigateToEnquiry } = useRouter();
 
   return (
     <PageWrapper
@@ -20,9 +21,10 @@ export function IngredientsPage() {
       <section className="relative bg-[#102A43] text-white pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=2000&q=80"
-            alt="Botanical resources"
-            className="w-full h-full object-cover opacity-20 mix-blend-luminosity"
+            src="/images/south_india_banana_varieties_1795782889959.jpg"
+            alt="South India banana varieties and raw materials"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover opacity-25 mix-blend-luminosity"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#102A43] via-[#102A43]/85 to-[#102A43]/60" />
         </div>
@@ -57,6 +59,7 @@ export function IngredientsPage() {
               <img
                 src={CURRENT_PRODUCT.image}
                 alt={CURRENT_PRODUCT.name}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-3 left-3">
@@ -111,13 +114,26 @@ export function IngredientsPage() {
                   Explore Full Product Dossier
                 </Button>
                 <Button
-                  href="/partner-with-us"
                   variant="gold"
+                  onClick={() =>
+                    navigateToEnquiry({
+                      enquiryType: 'Request a Sample',
+                      productInterest: 'Banana Powder (100% Pure)',
+                      requiredQuantity: 'Sample Pack (1 kg – 5 kg)'
+                    })
+                  }
                 >
-                  Commercial Inquiry
+                  Request a Sample
                 </Button>
                 <Button
                   variant="outline"
+                  onClick={downloadProductSpecificationPdf}
+                  icon={<Download className="w-4 h-4 text-[#285943]" />}
+                >
+                  Spec PDF
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={openSpecSheetModal}
                   icon={<FileText className="w-4 h-4 text-[#285943]" />}
                 >

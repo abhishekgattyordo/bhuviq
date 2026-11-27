@@ -7,7 +7,7 @@ export const APPLICATIONS: ApplicationCategory[] = [
     subtitle: "Ingredients for Modern Food Systems",
     description: "Transforming natural fruit solids into clean-label beverage bases, dairy inclusions, bakery mixes, and confectionery fillings with unmatched consistency.",
     iconName: "UtensilsCrossed",
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80",
+    image: "/images/insight_functional_food_matrix_1790839527671.jpg",
     keyBenefits: [
       "Natural sweetness and authentic tropical flavor without artificial enhancers",
       "Excellent suspension stability in smoothies, shakes, and instant drink powders",
@@ -28,7 +28,7 @@ export const APPLICATIONS: ApplicationCategory[] = [
     subtitle: "Natural Ingredient Solutions for Formulations",
     description: "Delivering digestible fruit carbohydrates, essential potassium, natural dietary fiber, and gentle energy profiles for high-performance dietary supplements.",
     iconName: "Activity",
-    image: "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=1000&q=80",
+    image: "/images/rd_lab_banana_powder_grades_1795783124764.jpg",
     keyBenefits: [
       "Naturally rich in bio-available potassium and complex plant carbohydrates",
       "Low glycaemic impact when utilizing resistant starch stages",
@@ -49,7 +49,7 @@ export const APPLICATIONS: ApplicationCategory[] = [
     subtitle: "Functional and Microbiome Opportunities",
     description: "Exploring prebiotic matrix carriers, botanical digestion aids, and daily functional health blends rooted in traditional agricultural intelligence.",
     iconName: "Sparkles",
-    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1000&q=80",
+    image: "/images/south_india_banana_varieties_1795782889959.jpg",
     keyBenefits: [
       "Promotes short-chain fatty acid (SCFA) generation in targeted gut microbiomes",
       "Gentle buffering effect on gastrointestinal mucosa",
@@ -70,7 +70,7 @@ export const APPLICATIONS: ApplicationCategory[] = [
     subtitle: "Future Naturally Derived Cosmetic Actives",
     description: "Unlocking fruit enzymes, potassium-rich humectant properties, and skin-softening plant lipids for clean, eco-conscious cosmetic formulations.",
     iconName: "HeartHandshake",
-    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1000&q=80",
+    image: "/images/banana_research_evaluation_lab_1795782891177.jpg",
     keyBenefits: [
       "Natural skin-conditioning properties from fruit oligosaccharides and minerals",
       "Mild enzymatic exfoliation without abrasive synthetic microplastics",
@@ -91,7 +91,7 @@ export const APPLICATIONS: ApplicationCategory[] = [
     subtitle: "Co-Development & Tailored Milling",
     description: "Collaborating with global product formulators to engineer specific moisture levels, mesh particle distributions, and packaging configurations for proprietary lines.",
     iconName: "Sliders",
-    image: "/src/assets/images/custom_milling_rd_1790851092404.jpg",
+    image: "/images/custom_milling_rd_1790851092404.jpg",
     keyBenefits: [
       "Custom particle sizing from coarse 40 mesh to ultra-fine 120 mesh",
       "Targeted moisture control tuned to customer packaging and storage climate",

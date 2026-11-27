@@ -9,7 +9,7 @@ export const CURRENT_PRODUCT: Product = {
   status: "Current Ingredient",
   shortDescription: "A standardized, free-flowing natural banana powder manufactured via controlled low-temperature dehydration and fine milling for exceptional flavor retention and consistent dispersion.",
   description: "BhuviQ Nyra Banana Powder is engineered specifically for B2B industrial formulation across bakery, dry beverage mixes, infant nutrition, functional snacks, and cosmetics. Produced in an enclosed hygienic facility in India, our process preserves natural carbohydrates, dietary potassium, pleasant aroma, and golden-ivory color without artificial additives or carriers.",
-  image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1200&q=80",
+  image: "/images/insight_banana_pure_ingredient_1790839554597.jpg",
   origin: "Sustainably sourced agricultural bananas (India)",
   processing: "Gentle low-temperature dehydration & precision micronization",
   form: "Fine homogenous free-flowing powder",
@@ -33,9 +33,9 @@ export const CURRENT_PRODUCT: Product = {
   specifications: [
     { label: "Physical Appearance", value: "Fine, free-flowing pale ivory to cream powder", method: "Visual / Sensory" },
     { label: "Aroma & Flavor", value: "Characteristic ripe natural banana aroma, clean sweet profile", method: "Organoleptic" },
-    { label: "Moisture Content (Demo Spec)", value: "≤ 5.0% w/w", method: "Karl Fischer / Halogen LOD" },
-    { label: "Particle Size Mesh (Demo Spec)", value: "≥ 95% pass through 60 to 100 Mesh", method: "Sieve Analysis" },
-    { label: "Bulk Density (Demo Spec)", value: "0.45 – 0.65 g/ml", method: "Tapped Density Meter" },
+    { label: "Moisture Content (LOD)", value: "≤ 5.0% w/w", method: "Karl Fischer / Halogen LOD" },
+    { label: "Particle Size Mesh", value: "≥ 95% pass through 60 to 100 Mesh", method: "ASTM Sieve Analysis" },
+    { label: "Bulk Density", value: "0.45 – 0.65 g/ml", method: "Tapped Density Meter" },
     { label: "Solubility / Rehydration", value: "Rapid dispersion in warm/cold aqueous matrices", method: "Internal Method" },
     { label: "pH (10% Solution in water)", value: "4.5 – 5.8", method: "pH Potentiometric" },
     { label: "Carriers / Fillers", value: "None (100% Pure Banana derived)", method: "Formulation Trace" }
@@ -73,7 +73,7 @@ export const FUTURE_CATEGORIES = [
     status: "R&D Pipeline",
     description: "Dehydrated tropical fruit matrices, natural texturizers, clean-label flavor carriers, and vegetable powders.",
     highlights: ["Mango solids", "Papaya powders", "Clean-label fruit sweeteners", "Natural color extracts"],
-    image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80"
+    image: "/images/insight_agri_value_addition_1790839474306.jpg"
   },
   {
     id: "nutrition-ingredients",
@@ -82,7 +82,7 @@ export const FUTURE_CATEGORIES = [
     status: "Formulation Exploration",
     description: "Prebiotic fiber fractions, resistant starch complexes, plant minerals, and sports nutrition powders.",
     highlights: ["Green banana resistant starch", "Soluble botanical fibers", "Electrolyte complexes", "Postbiotic precursors"],
-    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"
+    image: "/images/insight_functional_food_matrix_1790839527671.jpg"
   },
   {
     id: "wellness-ingredients",
@@ -91,7 +91,7 @@ export const FUTURE_CATEGORIES = [
     status: "Exploratory Roadmap",
     description: "Standardized herbal powders, adaptogenic fruit co-products, and gut-microbiome targeted ingredients.",
     highlights: ["Moringa derivatives", "Herbal synergy blends", "Natural digestion aids", "Cold-milled botanical powders"],
-    image: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=800&q=80"
+    image: "/images/south_india_banana_varieties_1795782889959.jpg"
   },
   {
     id: "beauty-ingredients",
@@ -100,6 +100,6 @@ export const FUTURE_CATEGORIES = [
     status: "Concept Exploration",
     description: "Botanical extracts and fruit powders for clean-label skincare, clay masks, bath powders, and haircare treatments.",
     highlights: ["Enzymatic banana powder for face masks", "Exfoliating seed meals", "Natural lipid fractions", "Cosmetic-grade botanicals"],
-    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80"
+    image: "/images/rd_lab_banana_powder_grades_1795783124764.jpg"
   }
 ];

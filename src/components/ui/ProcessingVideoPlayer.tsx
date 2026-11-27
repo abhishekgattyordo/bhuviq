@@ -95,21 +95,22 @@ export function ProcessingVideoPlayer({
             <img
               src={posterImage}
               alt={stageTitle}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80";
+                target.src = "/images/sector_ss316_processing_line_1790839222801.jpg";
               }}
             />
             <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4 text-center space-y-2">
               <div className="w-12 h-12 rounded-full bg-[#B89B5E]/30 border border-[#B89B5E] flex items-center justify-center text-[#B89B5E]">
-                <Activity className="w-6 h-6 animate-pulse" />
+                <Activity className="w-6 h-6" />
               </div>
               <p className="text-xs font-mono text-[#B89B5E] font-bold uppercase tracking-wider">
-                Industrial Facility Standby Feed
+                SS-316 Enclosed Processing Stage
               </p>
-              <p className="text-[11px] text-white/70 max-w-sm">
-                Live line monitoring and automated operational assay active.
+              <p className="text-[11px] text-white/80 max-w-sm">
+                Controlled dehydration, sanitary homogenization, and inline quality checkpoints.
               </p>
             </div>
           </div>
@@ -120,18 +121,24 @@ export function ProcessingVideoPlayer({
 
         {/* Header telemetry node info */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] px-2 py-0.5 bg-[#B89B5E] text-[#102A43] font-bold rounded">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-mono text-[10px] px-2 py-0.5 bg-[#B89B5E] text-[#102A43] font-bold rounded shrink-0">
               NODE {stageNumber}
             </span>
-            <span className="text-xs font-semibold text-white drop-shadow truncate max-w-[200px] sm:max-w-none">
+            <span className="text-xs font-semibold text-white drop-shadow truncate max-w-[180px] sm:max-w-none">
               {stageTitle}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/50 backdrop-blur-xs text-[10px] font-mono text-emerald-400 border border-emerald-400/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            <span>LIVE</span>
-          </div>
+          {videoUrl && isPlaying && !hasError ? (
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/50 backdrop-blur-xs text-[10px] font-mono text-emerald-400 border border-emerald-400/30 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>LIVE</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/50 backdrop-blur-xs text-[10px] font-mono text-[#B89B5E] border border-[#B89B5E]/30 shrink-0">
+              <span>PROCESS VIEW</span>
+            </div>
+          )}
         </div>
 
         {/* Floating Play/Pause Center Button if paused and video present */}

@@ -41,8 +41,9 @@ export function AboutPage() {
       <section className="relative bg-[#102A43] text-white pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=2000&q=80"
-            alt="Agricultural landscape"
+            src="/images/hero_sacred_soil_banana_1795779859978.jpg"
+            alt="Banana plantation and agricultural sourcing landscape"
+            referrerPolicy="no-referrer"
             className="w-full h-full object-cover opacity-25 mix-blend-luminosity"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#102A43] via-[#102A43]/80 to-[#102A43]/50" />

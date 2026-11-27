@@ -5,7 +5,7 @@ import { Button } from '../ui/Button';
 import { useRouter } from '../../context/RouterContext';
 
 export function HeroSection() {
-  const { navigate } = useRouter();
+  const { navigateToEnquiry } = useRouter();
   const [bgLoaded, setBgLoaded] = useState(true);
 
   const handleScrollToNext = () => {
@@ -16,12 +16,11 @@ export function HeroSection() {
   };
 
   const handleRequestSample = () => {
-    const partnerSection = document.getElementById('partner-section');
-    if (partnerSection) {
-      partnerSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      navigate('/partner-with-us');
-    }
+    navigateToEnquiry({
+      enquiryType: 'Request a Sample',
+      productInterest: 'Banana Powder (100% Pure)',
+      requiredQuantity: 'Sample Pack (1 kg – 5 kg)'
+    });
   };
 
   const containerVariants = {

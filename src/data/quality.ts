@@ -85,32 +85,32 @@ export const DOCUMENTATION_LIBRARY = [
     code: "DOC-BQNP-TDS-2026",
     category: "Technical",
     description: "Complete physical, chemical, organoleptic, and storage parameters for BhuviQ Nyra Banana Powder.",
-    format: "PDF Document (Demo Viewer Available)",
-    status: "Ready for Download"
+    format: "PDF Document (Download Ready)",
+    status: "Approved Reference"
   },
   {
-    title: "Certificate of Analysis (COA Template)",
+    title: "Sample Certificate of Analysis (COA Format)",
     code: "DOC-BQNP-COA-STD",
     category: "Quality Assurance",
-    description: "Standardized batch test reporting format detailing release testing, moisture assays, and sieve tests.",
-    format: "PDF Document (Demo Viewer Available)",
-    status: "Standard Issue"
+    description: "Standardized batch test reporting layout detailing release testing, moisture assays, and sieve tests.",
+    format: "PDF Template (Download Ready)",
+    status: "Format Reference"
   },
   {
     title: "Allergen & Non-GMO Statement",
     code: "DOC-BQNP-ALG-2026",
     category: "Regulatory & Compliance",
-    description: "Declaration confirming single-origin natural banana composition with zero allergen cross-contact in dedicated line.",
-    format: "PDF Document (Demo Viewer Available)",
-    status: "Standard Issue"
+    description: "Declaration confirming single-origin natural banana composition with zero carriers or allergen additives.",
+    format: "PDF Document (Download Ready)",
+    status: "Approved Reference"
   },
   {
     title: "Storage & Handling Technical Guide",
     code: "DOC-BQNP-HND-2026",
     category: "Handling & Logistics",
     description: "Guidelines for industrial hopper loading, ambient humidity management, and resealing open liners.",
-    format: "PDF Document (Demo Viewer Available)",
-    status: "Standard Issue"
+    format: "PDF Document (Download Ready)",
+    status: "Approved Reference"
   }
 ];
 

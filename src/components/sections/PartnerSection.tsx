@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { cn } from '../../lib/utils';
+import { Link, useRouter } from '../../context/RouterContext';
 import {
   CheckCircle2,
   Building2,
@@ -32,7 +33,7 @@ interface EnquiryOptionCard {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const ENQUIRY_OPTIONS: EnquiryOptionCard[] = [
+export const ENQUIRY_OPTIONS: EnquiryOptionCard[] = [
   {
     type: 'Request a Sample',
     summary: 'Order product samples for lab evaluation, formulation trials, and internal sensory assessment.',
@@ -71,6 +72,17 @@ const ENQUIRY_OPTIONS: EnquiryOptionCard[] = [
   }
 ];
 
+export const INTENDED_APPLICATIONS = [
+  'Food & Beverage Manufacturing',
+  'Bakery & Confectionery',
+  'Nutrition & Functional Supplements',
+  'Food Processing & Dry Premixes',
+  'Cosmetics & Personal Care',
+  'Pharmaceutical Evaluation',
+  'Import / Export / Ingredient Distribution',
+  'Other Industrial Application'
+];
+
 interface CommercialFormState {
   fullName: string;
   companyName: string;
@@ -79,6 +91,7 @@ interface CommercialFormState {
   country: string;
   enquiryType: EnquiryTypeOption;
   productInterest: string;
+  intendedApplication: string;
   requiredQuantity: string;
   message: string;
 }
@@ -87,6 +100,7 @@ type FieldErrors = Partial<Record<keyof CommercialFormState, string>>;
 
 export function PartnerSection() {
   const formRef = useRef<HTMLFormElement>(null);
+  const { enquiryPreset, clearEnquiryPreset } = useRouter();
 
   const [formData, setFormData] = useState<CommercialFormState>({
     fullName: '',
@@ -96,6 +110,7 @@ export function PartnerSection() {
     country: '',
     enquiryType: 'Request a Sample',
     productInterest: 'Banana Powder (100% Pure)',
+    intendedApplication: 'Food & Beverage Manufacturing',
     requiredQuantity: 'Sample Pack (1 kg – 5 kg)',
     message: ''
   });
@@ -105,6 +120,34 @@ export function PartnerSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedSnapshot, setSubmittedSnapshot] = useState<CommercialFormState | null>(null);
+
+  const normalizeApplicationPreset = (value?: string): string | undefined => {
+    if (!value) return undefined;
+    if (INTENDED_APPLICATIONS.includes(value)) return value;
+    const mapping: Record<string, string> = {
+      'Food & Beverage': 'Food & Beverage Manufacturing',
+      'Nutrition & Functional Foods': 'Nutrition & Functional Supplements',
+      'Wellness & Gut Health': 'Nutrition & Functional Supplements',
+      'Beauty & Personal Care': 'Cosmetics & Personal Care',
+      'Custom Applications': 'Other Industrial Application'
+    };
+    return mapping[value] || value;
+  };
+
+  useEffect(() => {
+    if (!enquiryPreset) return;
+    setIsSubmitted(false);
+    const matchedOption = ENQUIRY_OPTIONS.find((opt) => opt.type === enquiryPreset.enquiryType);
+    const normalizedApp = normalizeApplicationPreset(enquiryPreset.intendedApplication);
+    setFormData((prev) => ({
+      ...prev,
+      enquiryType: matchedOption ? matchedOption.type : prev.enquiryType,
+      productInterest: enquiryPreset.productInterest || prev.productInterest,
+      intendedApplication: normalizedApp || prev.intendedApplication,
+      requiredQuantity: enquiryPreset.requiredQuantity || (matchedOption ? matchedOption.defaultQuantity : prev.requiredQuantity)
+    }));
+    clearEnquiryPreset();
+  }, [enquiryPreset, clearEnquiryPreset]);
 
   const handleSelectEnquiryOption = (option: EnquiryOptionCard) => {
     setFormData((prev) => ({
@@ -146,6 +189,9 @@ export function PartnerSection() {
     if (!state.productInterest.trim()) {
       errors.productInterest = 'Please select a product of interest.';
     }
+    if (!state.intendedApplication.trim()) {
+      errors.intendedApplication = 'Please select an intended application.';
+    }
     if (!state.message.trim() || state.message.trim().length < 10) {
       errors.message = 'Please share your requirements or question (at least 10 characters).';
     }
@@ -186,7 +232,7 @@ export function PartnerSection() {
         email: formData.businessEmail.trim(),
         phone: formData.phone.trim() || undefined,
         product: formData.productInterest,
-        application: formData.enquiryType,
+        application: formData.intendedApplication,
         quantity: formData.requiredQuantity.trim() || 'To Be Discussed',
         message: `[${formData.enquiryType}] ${formData.message.trim()}`
       };
@@ -230,6 +276,7 @@ export function PartnerSection() {
       country: '',
       enquiryType: 'Request a Sample',
       productInterest: 'Banana Powder (100% Pure)',
+      intendedApplication: 'Food & Beverage Manufacturing',
       requiredQuantity: 'Sample Pack (1 kg – 5 kg)',
       message: ''
     });
@@ -246,24 +293,24 @@ export function PartnerSection() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.22em] text-[#B89B5E] font-semibold">
-            <span>Commercial Enquiry</span>
+            <span>Commercial Enquiry Pathway</span>
             <span aria-hidden="true">·</span>
             <span className="text-[#FAF7F0]/80">B2B &amp; Technical Desk</span>
           </div>
 
           <h2 className="font-serif text-3xl sm:text-5xl lg:text-[54px] text-[#FAF7F0] font-normal leading-[1.1] text-balance">
-            Direct Commercial &amp; Ingredient Enquiries
+            Commercial Enquiry Pathway
           </h2>
 
           <p className="text-base sm:text-lg text-[#FAF7F0]/80 font-light leading-relaxed max-w-2xl mx-auto">
-            Select an enquiry type below and complete the form with your commercial, sample, export, technical, or partnership requirements.
+            Choose from our six commercial and technical enquiry pathways below and submit your requirements directly to our B2B team.
           </p>
         </div>
 
         {/* 6 Selectable Enquiry Option Cards */}
         <div className="space-y-4">
           <p className="text-xs uppercase tracking-[0.2em] text-[#B89B5E] font-semibold text-center">
-            Select Enquiry Type
+            Select Enquiry Option (01 – 06)
           </p>
 
           <div
@@ -271,7 +318,7 @@ export function PartnerSection() {
             aria-label="Commercial enquiry options"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            {ENQUIRY_OPTIONS.map((option) => {
+            {ENQUIRY_OPTIONS.map((option, idx) => {
               const Icon = option.icon;
               const isSelected = formData.enquiryType === option.type;
 
@@ -303,10 +350,10 @@ export function PartnerSection() {
                     <span
                       className={cn(
                         'font-mono text-[11px] uppercase tracking-wider font-semibold',
-                        isSelected ? 'text-[#B89B5E]' : 'text-white/50'
+                        isSelected ? 'text-[#B89B5E]' : 'text-white/55'
                       )}
                     >
-                      {isSelected ? 'Selected' : 'Select'}
+                      0{idx + 1} · {isSelected ? 'Selected' : 'Select'}
                     </span>
                   </div>
 
@@ -362,6 +409,12 @@ export function PartnerSection() {
                   <span className="text-[#667085]">Product of Interest</span>
                   <span className="font-medium text-[#285943] text-right">
                     {submittedSnapshot.productInterest}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-4 border-b border-[#102A43]/10 pb-2">
+                  <span className="text-[#667085]">Intended Application</span>
+                  <span className="font-medium text-[#102A43] text-right">
+                    {submittedSnapshot.intendedApplication}
                   </span>
                 </div>
                 <div className="flex justify-between gap-4">
@@ -597,6 +650,32 @@ export function PartnerSection() {
                   </select>
                 </div>
 
+                {/* Intended Application */}
+                <div>
+                  <label
+                    htmlFor="enquiry-application"
+                    className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
+                  >
+                    Intended Application *
+                  </label>
+                  <select
+                    id="enquiry-application"
+                    required
+                    value={formData.intendedApplication}
+                    onChange={(e) => handleFieldChange('intendedApplication', e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-[#102A43]/20 rounded-sm text-sm text-[#17202A] focus:outline-none focus:border-[#102A43] focus:ring-2 focus:ring-[#102A43]/20"
+                  >
+                    {INTENDED_APPLICATIONS.map((app) => (
+                      <option key={app} value={app}>
+                        {app}
+                      </option>
+                    ))}
+                  </select>
+                  {fieldErrors.intendedApplication && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.intendedApplication}</p>
+                  )}
+                </div>
+
                 {/* Required Quantity */}
                 <div>
                   <label
@@ -622,7 +701,7 @@ export function PartnerSection() {
                   htmlFor="enquiry-message"
                   className="block text-xs font-semibold uppercase tracking-wider text-[#102A43] mb-1.5"
                 >
-                  Message / Additional Requirements *
+                  Additional Message / Requirements *
                 </label>
                 <textarea
                   id="enquiry-message"
@@ -643,10 +722,20 @@ export function PartnerSection() {
               </div>
 
               {/* Submit Bar */}
-              <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#102A43]/10">
-                <div className="flex items-center gap-2 text-xs text-[#667085]">
-                  <ShieldCheck className="w-4 h-4 text-[#285943] shrink-0" />
-                  <span>Confidential B2B commercial and technical handling</span>
+              <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-[#102A43]/10">
+                <div className="flex items-start gap-2 text-xs text-[#667085]">
+                  <ShieldCheck className="w-4 h-4 text-[#285943] shrink-0 mt-0.5" />
+                  <span>
+                    Confidential B2B handling. By submitting, you acknowledge our{' '}
+                    <Link href="/privacy-policy" className="text-[#102A43] underline hover:text-[#285943] font-medium">
+                      Privacy Policy
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/terms-and-conditions" className="text-[#102A43] underline hover:text-[#285943] font-medium">
+                      Terms &amp; Conditions
+                    </Link>
+                    .
+                  </span>
                 </div>
 
                 <Button
@@ -655,7 +744,7 @@ export function PartnerSection() {
                   size="lg"
                   isLoading={isLoading}
                   showArrow={!isLoading}
-                  className="w-full sm:w-auto tracking-wider text-xs font-bold uppercase min-w-[200px]"
+                  className="w-full sm:w-auto tracking-wider text-xs font-bold uppercase min-w-[200px] min-h-[46px]"
                 >
                   {isLoading ? 'Submitting...' : 'Submit Enquiry'}
                 </Button>

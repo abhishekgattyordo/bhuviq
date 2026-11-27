@@ -45,9 +45,10 @@ export function PartnerWithUsPage() {
       <section className="relative bg-[#102A43] text-white pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=2000&q=80"
-            alt="Agricultural partnership"
-            className="w-full h-full object-cover opacity-20 mix-blend-luminosity"
+            src="/images/responsible_sourcing_traceability_1795783459588.jpg"
+            alt="Responsible agricultural partnership and ingredient sourcing"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover opacity-25 mix-blend-luminosity"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#102A43] via-[#102A43]/85 to-[#102A43]/60" />
         </div>

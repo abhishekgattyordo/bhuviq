@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { jsPDF } from 'jspdf';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { Button } from '../components/ui/Button';
 import { CURRENT_PRODUCT } from '../data/products';
 import { PRODUCT_SPEC_SHEET } from '../data/quality';
+import { downloadProductSpecificationPdf } from '../lib/pdfDocuments';
 import {
   FileText,
   Download,
@@ -25,7 +25,7 @@ type SpecFilter = 'all' | 'physicochemical' | 'microbiological' | 'nutritional';
 type SectionId = 'product-overview' | 'technical-specifications' | 'packaging-logistics' | 'applications';
 
 export function BananaPowderPage() {
-  const { openSpecSheetModal, navigate } = useRouter();
+  const { openSpecSheetModal, navigateToEnquiry } = useRouter();
   const [specFilter, setSpecFilter] = useState<SpecFilter>('all');
   const [activeSection, setActiveSection] = useState<SectionId>('product-overview');
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
@@ -41,150 +41,7 @@ export function BananaPowderPage() {
   };
 
   const handleDownloadSpecificationPdf = () => {
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 44;
-    const contentWidth = pageWidth - margin * 2;
-    let y = 0;
-
-    const ensureSpace = (needed: number) => {
-      if (y + needed > pageHeight - 54) {
-        doc.addPage();
-        y = 48;
-      }
-    };
-
-    const addSectionTitle = (title: string) => {
-      ensureSpace(34);
-      doc.setFillColor(247, 243, 234);
-      doc.rect(margin, y, contentWidth, 22, 'F');
-      doc.setDrawColor(184, 155, 94);
-      doc.line(margin, y + 22, margin + contentWidth, y + 22);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(16, 42, 67);
-      doc.text(title.toUpperCase(), margin + 8, y + 15);
-      y += 32;
-    };
-
-    const addRow = (label: string, value: string, extra?: string) => {
-      const valueText = extra ? `${value}  (${extra})` : value;
-      const wrapped = doc.splitTextToSize(valueText, contentWidth - 185);
-      const rowHeight = Math.max(18, wrapped.length * 13 + 6);
-      ensureSpace(rowHeight + 4);
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(16, 42, 67);
-      doc.text(label, margin + 4, y + 11);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(40, 55, 71);
-      doc.text(wrapped, margin + 180, y + 11);
-
-      doc.setDrawColor(225, 225, 220);
-      doc.line(margin, y + rowHeight, margin + contentWidth, y + rowHeight);
-      y += rowHeight + 2;
-    };
-
-    // Header Banner
-    doc.setFillColor(16, 42, 67);
-    doc.rect(0, 0, pageWidth, 88, 'F');
-    doc.setFillColor(184, 155, 94);
-    doc.rect(0, 88, pageWidth, 3, 'F');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(184, 155, 94);
-    doc.text('BHUVIQ NYRA INTERNATIONAL  |  PRODUCT SPECIFICATION SHEET', margin, 30);
-
-    doc.setFontSize(19);
-    doc.setTextColor(250, 247, 240);
-    doc.text('Banana Powder (100% Pure)', margin, 54);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9.5);
-    doc.setTextColor(225, 225, 220);
-    doc.text(`Botanical Name: ${CURRENT_PRODUCT.botanicalName}   |   Doc Ref: TDS-BQNP-2026`, margin, 73);
-
-    y = 112;
-
-    // 1. Product Overview, Maturity & Composition
-    addSectionTitle('1. Product Overview, Maturity & Composition');
-    addRow('Product Name', 'Banana Powder (100% Pure)');
-    addRow('Botanical Source', CURRENT_PRODUCT.botanicalName);
-    addRow('Geographic Origin', 'India (Approved agricultural clusters)');
-    addRow('Banana Maturity', 'Ripe (controlled ripeness & °Brix graded prior to dehydration)');
-    addRow('Ingredient Composition', '100% Pure Banana (no carriers, fillers, maltodextrin, or additives)');
-    addRow('Banana Peel Status', 'Excluded (sanitary washed and hygienically peeled prior to processing)');
-    addRow('Processing Method', 'Enclosed SS-316 low-temperature dehydration and calibrated milling');
-    y += 8;
-
-    // 2. Physicochemical Specifications
-    addSectionTitle('2. Physicochemical Specifications');
-    addRow('Moisture Content (LOD)', '<= 5.0% w/w', 'Halogen / AOAC 925.10 / Karl Fischer');
-    addRow('Water Activity (aw)', 'Not published - confirmed per lot COA upon request');
-    addRow('Particle Size / Mesh', '>= 95% pass through 60 to 100 Mesh', 'ASTM Sieve Analysis');
-    addRow('Colour / Appearance', 'Pale golden-ivory to light cream, fine free-flowing powder', 'Visual / Lovibond');
-    addRow('pH (10% aqueous solution)', '4.8 - 5.6', 'Potentiometric');
-    addRow('Bulk Density', '0.45 - 0.65 g/ml (Tapped)', 'USP <616>');
-    addRow('Aroma & Taste', 'Characteristic ripe banana aroma, clean natural sweet profile', 'Organoleptic');
-    y += 8;
-
-    // 3. Microbiological Limits & Heavy Metals
-    addSectionTitle('3. Microbiological Limits & Heavy Metals');
-    PRODUCT_SPEC_SHEET.microbiological.forEach((item) => {
-      addRow(item.parameter, item.specification, item.method);
-    });
-    addRow(
-      'Heavy Metals (Pb, As, Cd, Hg)',
-      'Not published - accredited lab screening dossier confirmed per batch COA upon request'
-    );
-    y += 8;
-
-    // 4. Nutritional Information
-    addSectionTitle('4. Nutritional Values');
-    addRow(
-      'Confirmed Profile',
-      '100% single-ingredient ripe banana carbohydrates, naturally occurring dietary potassium and soluble fibers; zero added sugars or carriers.'
-    );
-    addRow(
-      'Quantitative Nutrition Panel',
-      'Not yet published - accredited per-100g nutritional values are issued upon official technical inquiry.'
-    );
-    y += 8;
-
-    // 5. Packaging, Storage, Shelf Life, MOQ & Lead Time
-    addSectionTitle('5. Packaging, Storage, Shelf Life & Commercial Supply');
-    addRow(
-      'Packaging Formats',
-      '25 kg fiber drum with double PE barrier liner; 20 kg / 25 kg multi-layer kraft bag with aluminum/PE moisture barrier; 1 kg / 5 kg / 10 kg pilot pouches.'
-    );
-    addRow(
-      'Storage Instructions',
-      'Store in cool, dry, dark conditions below 25°C (77°F) and < 60% RH. Hygroscopic material: heat-reseal or tightly clamp inner liner after opening.'
-    );
-    addRow('Shelf Life', '24 months from manufacturing date in unopened original barrier packaging.');
-    addRow('MOQ', 'Pilot runs confirmed from 25 kg; commercial bulk MOQ confirmed per quotation.');
-    addRow('Lead Time', 'Not fixed - confirmed per order quantity, mesh specification, and destination schedule upon inquiry.');
-
-    // Footer on all pages
-    const totalPages = doc.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i += 1) {
-      doc.setPage(i);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(102, 112, 133);
-      doc.text(
-        'BhuviQ Nyra International  •  Only confirmed baseline specifications are listed; lot-specific values are issued on the official Batch COA.',
-        margin,
-        pageHeight - 24
-      );
-      doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin - 48, pageHeight - 24);
-    }
-
-    doc.save('BhuviQ-Nyra-Banana-Powder-Specification.pdf');
+    downloadProductSpecificationPdf();
     setPdfDownloaded(true);
     setTimeout(() => setPdfDownloaded(false), 4000);
   };
@@ -316,7 +173,13 @@ export function BananaPowderPage() {
               <Button
                 variant="outline-light"
                 size="md"
-                onClick={() => navigate('/partner-with-us')}
+                onClick={() =>
+                  navigateToEnquiry({
+                    enquiryType: 'Request a Sample',
+                    productInterest: 'Banana Powder (100% Pure)',
+                    requiredQuantity: 'Sample Pack (1 kg – 5 kg)'
+                  })
+                }
                 icon={<Send className="w-4 h-4" />}
                 showArrow
                 className="justify-center"
@@ -401,9 +264,9 @@ export function BananaPowderPage() {
       {/* Easy-to-Navigate Sticky Section Anchor Bar */}
       <nav
         aria-label="Product sections"
-        className="sticky top-[60px] sm:top-[64px] xl:top-[72px] z-30 bg-[#FAF8F2]/95 backdrop-blur-md border-b border-[#102A43]/10"
+        className="sticky top-[56px] sm:top-[64px] xl:top-[72px] z-30 bg-[#FAF8F2]/95 backdrop-blur-md border-b border-[#102A43]/10"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 py-3 overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 py-2 overflow-x-auto">
           <div className="flex items-center gap-2 sm:gap-4 text-xs font-semibold uppercase tracking-wider text-[#102A43]">
             {[
               { id: 'product-overview', label: '01. Overview & Composition' },
@@ -731,7 +594,13 @@ export function BananaPowderPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/partner-with-us')}
+                    onClick={() =>
+                      navigateToEnquiry({
+                        enquiryType: 'Ask a Technical Question',
+                        productInterest: 'Banana Powder (100% Pure)',
+                        requiredQuantity: 'Documentation Review'
+                      })
+                    }
                     className="w-full"
                     showArrow
                   >
@@ -979,12 +848,18 @@ export function BananaPowderPage() {
           </p>
           <div className="pt-2 flex flex-col sm:flex-row justify-center gap-3.5">
             <Button
-              href="/partner-with-us"
+              onClick={() =>
+                navigateToEnquiry({
+                  enquiryType: 'Request a Sample',
+                  productInterest: 'Banana Powder (100% Pure)',
+                  requiredQuantity: 'Sample Pack (1 kg – 5 kg)'
+                })
+              }
               variant="gold"
               size="lg"
               showArrow
             >
-              Request Sample & Quotation
+              Request Sample &amp; Quotation
             </Button>
             <Button
               variant="outline-light"

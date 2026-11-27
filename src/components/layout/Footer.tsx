@@ -1,27 +1,60 @@
 import React, { useState } from 'react';
-import { Mail, ArrowRight, CheckCircle2, Globe, ShieldCheck, Sparkles, MapPin, Phone } from 'lucide-react';
+import { Mail, ArrowRight, CheckCircle2, Sparkles, MapPin, Phone, MessageCircle, AlertCircle } from 'lucide-react';
 import { FOOTER_LINKS } from '../../data/navigation';
 import { COMPANY_INFO } from '../../data/company';
 import { Link, useRouter } from '../../context/RouterContext';
-import { Button } from '../ui/Button';
 import { BrandLogo } from '../ui/BrandLogo';
 
 export function Footer() {
-  const { openSpecSheetModal, navigate } = useRouter();
+  const { openSpecSheetModal, navigateToEnquiry } = useRouter();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscribeError, setSubscribeError] = useState('');
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const whatsappDigits = COMPANY_INFO.location.whatsapp
+    ? COMPANY_INFO.location.whatsapp.replace(/[^\d]/g, '')
+    : '';
+
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newsletterEmail || !newsletterEmail.includes('@')) return;
+    setSubscribeError('');
+    const email = newsletterEmail.trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      setSubscribeError('Please enter a valid business email.');
+      return;
+    }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Technical Bulletin Subscriber',
+          company: 'Bulletin Subscription',
+          country: 'International',
+          email,
+          product: 'Technical R&D Bulletins',
+          application: 'Documentation & Updates',
+          quantity: 'Not Applicable',
+          message: '[Technical Bulletin Subscription] Requesting technical updates and product documentation bulletins.'
+        })
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        setSubscribeError(data.message || 'Unable to register subscription right now.');
+        setIsSubmitting(false);
+        return;
+      }
       setIsSubmitting(false);
       setIsSubscribed(true);
       setNewsletterEmail('');
-    }, 700);
+    } catch {
+      setIsSubmitting(false);
+      setSubscribeError('Network error while subscribing. Please try again.');
+    }
   };
 
   return (
@@ -39,33 +72,66 @@ export function Footer() {
             </Link>
 
             <p className="text-sm text-[#FAF7F0]/70 max-w-sm leading-relaxed font-light">
-              Transforming natural agricultural resources into high-purity, standardized ingredients for international food, nutrition, wellness, and personal care formulators.
+              Transforming natural agricultural resources into high-purity, standardized ingredients for international food, nutrition, wellness, cosmetic, and pharmaceutical formulators.
             </p>
 
-            {/* Origin marker */}
-            <div className="pt-2 space-y-1.5 text-xs text-[#FAF7F0]/60">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-[#B89B5E] shrink-0" />
-                <span>Agri-Industrial Corridor, Karnataka & Maharashtra, India</span>
+            {/* Verified Origin & Conditional Official Channels */}
+            <div className="pt-2 space-y-1.5 text-xs text-[#FAF7F0]/70">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-3.5 h-3.5 text-[#B89B5E] shrink-0 mt-0.5" />
+                <span>{COMPANY_INFO.legalName} · {COMPANY_INFO.location.country}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-[#B89B5E] shrink-0" />
-                <span>business@bhuviqnyra.example</span>
-              </div>
+              {COMPANY_INFO.location.email ? (
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-[#B89B5E] shrink-0" />
+                  <a href={`mailto:${COMPANY_INFO.location.email}`} className="hover:text-white transition-colors">
+                    {COMPANY_INFO.location.email}
+                  </a>
+                </div>
+              ) : null}
+              {COMPANY_INFO.location.phone ? (
+                <div className="flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-[#B89B5E] shrink-0" />
+                  <a href={`tel:${COMPANY_INFO.location.phone}`} className="hover:text-white transition-colors">
+                    {COMPANY_INFO.location.phone}
+                  </a>
+                </div>
+              ) : null}
+              {whatsappDigits ? (
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-3.5 h-3.5 text-[#B89B5E] shrink-0" />
+                  <a
+                    href={`https://wa.me/${whatsappDigits}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    WhatsApp Business Desk
+                  </a>
+                </div>
+              ) : null}
             </div>
 
-            {/* Quick Spec / Commercial CTA */}
+            {/* Quick Spec / Sample / Commercial CTA */}
             <div className="pt-2 flex flex-wrap gap-2">
               <button
-                onClick={() => navigate('/partner-with-us')}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#B89B5E] hover:text-white px-3 py-1.5 rounded-sm bg-[#B89B5E]/10 border border-[#B89B5E]/30 hover:bg-[#B89B5E]/20 transition-all"
+                type="button"
+                onClick={() =>
+                  navigateToEnquiry({
+                    enquiryType: 'Request a Sample',
+                    productInterest: 'Banana Powder (100% Pure)',
+                    requiredQuantity: 'Sample Pack (1 kg – 5 kg)'
+                  })
+                }
+                className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#B89B5E] hover:text-white px-3 py-2 rounded-sm bg-[#B89B5E]/10 border border-[#B89B5E]/30 hover:bg-[#B89B5E]/20 transition-all cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Commercial Inquiry</span>
+                <span>Request a Sample</span>
               </button>
               <button
+                type="button"
                 onClick={openSpecSheetModal}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#FAF7F0]/80 hover:text-white px-3 py-1.5 rounded-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#FAF7F0]/85 hover:text-white px-3 py-2 rounded-sm bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer"
               >
                 <span>View Product TDS</span>
               </button>
@@ -113,7 +179,7 @@ export function Footer() {
           {/* Column 3: Connect & Newsletter */}
           <div className="space-y-4">
             <h4 className="text-xs uppercase tracking-[0.2em] font-semibold text-[#B89B5E]">
-              Connect & Updates
+              Connect &amp; Updates
             </h4>
             <ul className="space-y-2 text-sm text-[#FAF7F0]/75">
               {FOOTER_LINKS.connect.map((item) => (
@@ -128,10 +194,10 @@ export function Footer() {
               ))}
             </ul>
 
-            {/* Newsletter input */}
-            <div className="pt-2">
-              <p className="text-xs text-[#FAF7F0]/70 mb-2">
-                Subscribe for ingredient R&D bulletins:
+            {/* Technical Bulletin subscription */}
+            <div className="pt-2 space-y-2">
+              <p className="text-xs text-[#FAF7F0]/70">
+                Subscribe for ingredient R&amp;D bulletins:
               </p>
               {isSubscribed ? (
                 <div className="p-2.5 bg-[#285943]/50 border border-[#285943] text-xs text-[#FAF7F0] rounded-sm flex items-center gap-2">
@@ -139,23 +205,35 @@ export function Footer() {
                   <span>Subscribed to technical bulletins.</span>
                 </div>
               ) : (
-                <form onSubmit={handleSubscribe} className="flex items-stretch gap-1.5">
-                  <input
-                    type="email"
-                    required
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    placeholder="corporate@domain.com"
-                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-sm text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#B89B5E]"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-3 py-2 bg-[#B89B5E] text-[#102A43] hover:bg-[#A88B4E] rounded-sm text-xs font-semibold transition-colors shrink-0"
-                    aria-label="Subscribe"
-                  >
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                <form onSubmit={handleSubscribe} noValidate className="space-y-1.5">
+                  <div className="flex items-stretch gap-1.5">
+                    <input
+                      type="email"
+                      required
+                      value={newsletterEmail}
+                      onChange={(e) => {
+                        setNewsletterEmail(e.target.value);
+                        if (subscribeError) setSubscribeError('');
+                      }}
+                      placeholder="name@company.com"
+                      aria-label="Business email for technical bulletins"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-sm text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#B89B5E]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="px-3 py-2 bg-[#B89B5E] text-[#102A43] hover:bg-[#A88B4E] rounded-sm text-xs font-semibold transition-colors shrink-0 disabled:opacity-60 cursor-pointer"
+                      aria-label="Subscribe"
+                    >
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  {subscribeError && (
+                    <p className="text-[11px] text-red-300 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
+                      <span>{subscribeError}</span>
+                    </p>
+                  )}
                 </form>
               )}
             </div>
@@ -164,7 +242,7 @@ export function Footer() {
 
         {/* Bottom Copyright and Legal */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#FAF7F0]/60 font-light">
-          <div>
+          <div className="text-center sm:text-left">
             © {COMPANY_INFO.establishedYear} Bhuvi Q Nyra International Private Limited. All rights reserved.
           </div>
           <nav aria-label="Trust and legal links" className="flex flex-wrap items-center justify-center gap-6">

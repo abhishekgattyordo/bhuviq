@@ -86,11 +86,12 @@ export function InsightsSection() {
               <img
                 src={featuredArticle.heroImage}
                 alt={featuredArticle.title}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 loading="lazy"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1200&q=80";
+                  target.src = "/images/insight_banana_pure_ingredient_1790839554597.jpg";
                 }}
               />
             </div>
@@ -141,11 +142,12 @@ export function InsightsSection() {
                 <img
                   src={article.heroImage}
                   alt={article.title}
+                  referrerPolicy="no-referrer"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=800&q=80";
+                    target.src = "/images/insight_banana_pure_ingredient_1790839554597.jpg";
                   }}
                 />
                 <div className="absolute top-3 left-3 bg-[#FAF7F0]/90 backdrop-blur-xs text-[#102A43] px-2.5 py-0.5 rounded text-[10px] font-semibold uppercase">

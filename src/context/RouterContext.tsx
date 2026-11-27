@@ -1,8 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+export interface EnquiryPreset {
+  enquiryType?: string;
+  productInterest?: string;
+  intendedApplication?: string;
+  requiredQuantity?: string;
+}
+
 interface RouterContextType {
   currentPath: string;
   navigate: (path: string, options?: { replace?: boolean; scrollToTop?: boolean }) => void;
+  navigateToEnquiry: (preset?: EnquiryPreset) => void;
+  enquiryPreset: EnquiryPreset | null;
+  clearEnquiryPreset: () => void;
   openSpecSheetModal: () => void;
   closeSpecSheetModal: () => void;
   isSpecSheetModalOpen: boolean;
@@ -19,6 +29,7 @@ export function RouterProvider({ children }: { children: ReactNode }) {
   });
 
   const [isSpecSheetModalOpen, setIsSpecSheetModalOpen] = useState(false);
+  const [enquiryPreset, setEnquiryPreset] = useState<EnquiryPreset | null>(null);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -55,10 +66,26 @@ export function RouterProvider({ children }: { children: ReactNode }) {
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 100);
+      }, 120);
     } else if (options.scrollToTop !== false) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const navigateToEnquiry = (preset?: EnquiryPreset) => {
+    if (preset) {
+      setEnquiryPreset(preset);
+    }
+    const existingSection = document.getElementById('commercial-enquiry');
+    if (existingSection) {
+      existingSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/partner-with-us#commercial-enquiry');
+    }
+  };
+
+  const clearEnquiryPreset = () => {
+    setEnquiryPreset(null);
   };
 
   const openSpecSheetModal = () => {
@@ -74,6 +101,9 @@ export function RouterProvider({ children }: { children: ReactNode }) {
       value={{
         currentPath,
         navigate,
+        navigateToEnquiry,
+        enquiryPreset,
+        clearEnquiryPreset,
         openSpecSheetModal,
         closeSpecSheetModal,
         isSpecSheetModalOpen

@@ -1,14 +1,15 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Check, Package, Sparkles, FileText, Layers, ShieldCheck } from 'lucide-react';
+import { Check, FileText, Download, ShieldCheck } from 'lucide-react';
 import { SectionHeading } from '../ui/SectionHeading';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { CURRENT_PRODUCT } from '../../data/products';
 import { useRouter } from '../../context/RouterContext';
+import { downloadProductSpecificationPdf } from '../../lib/pdfDocuments';
 
 export function FeaturedIngredient() {
-  const { openSpecSheetModal } = useRouter();
+  const { openSpecSheetModal, navigateToEnquiry } = useRouter();
 
   return (
     <section className="py-24 sm:py-32 bg-[#FAF8F2] text-[#17202A] border-b border-[#102A43]/10 overflow-hidden">
@@ -33,6 +34,7 @@ export function FeaturedIngredient() {
               <img
                 src={CURRENT_PRODUCT.image}
                 alt="BhuviQ Nyra Pure Banana Powder"
+                referrerPolicy="no-referrer"
                 className="w-full aspect-[4/3] object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#102A43]/80 via-transparent to-transparent opacity-80" />
@@ -122,17 +124,18 @@ export function FeaturedIngredient() {
               ))}
             </div>
 
-            {/* Applications Pills */}
+            {/* Applications Tags */}
             <div className="space-y-2 pt-2">
               <span className="text-xs uppercase tracking-wider text-[#667085] font-semibold block">
-                Target Industrial Applications:
+                Target Industrial Buyer Sectors:
               </span>
               <div className="flex flex-wrap gap-2">
                 {[
                   "Food & Beverage",
-                  "Bakery",
+                  "Bakery & Snacks",
                   "Nutrition",
-                  "Food Processing"
+                  "Cosmetics",
+                  "Pharmaceutical"
                 ].map((app) => (
                   <span
                     key={app}
@@ -150,17 +153,42 @@ export function FeaturedIngredient() {
                 View Product Details
               </Button>
               <Button
-                href="/partner-with-us"
-                variant="outline"
+                variant="gold"
+                onClick={() =>
+                  navigateToEnquiry({
+                    enquiryType: 'Request a Sample',
+                    productInterest: 'Banana Powder (100% Pure)',
+                    requiredQuantity: 'Sample Pack (1 kg – 5 kg)'
+                  })
+                }
               >
-                Commercial Inquiry
+                Request a Sample
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  navigateToEnquiry({
+                    enquiryType: 'Request a Quotation',
+                    productInterest: 'Banana Powder (100% Pure)',
+                    requiredQuantity: 'Bulk / Pilot Order'
+                  })
+                }
+              >
+                Product Enquiry
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={downloadProductSpecificationPdf}
+                icon={<Download className="w-4 h-4 text-[#285943]" />}
+              >
+                Download Spec PDF
               </Button>
               <Button
                 variant="ghost"
                 onClick={openSpecSheetModal}
                 icon={<FileText className="w-4 h-4 text-[#285943]" />}
               >
-                View Specs (TDS)
+                Preview TDS
               </Button>
             </div>
           </motion.div>

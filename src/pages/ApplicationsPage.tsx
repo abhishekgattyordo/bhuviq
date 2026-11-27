@@ -8,7 +8,7 @@ import { UtensilsCrossed, Activity, Sparkles, HeartHandshake, Sliders, CheckCirc
 import { useRouter } from '../context/RouterContext';
 
 export function ApplicationsPage() {
-  const { navigate } = useRouter();
+  const { navigateToEnquiry } = useRouter();
 
   const iconMap = {
     "food-beverage": <UtensilsCrossed className="w-6 h-6" />,
@@ -30,8 +30,9 @@ export function ApplicationsPage() {
             initial={{ scale: 1.08, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.2 }}
             transition={{ duration: 1.2, ease: 'easeOut' }}
-            src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=2000&q=80"
-            alt="Food and nutrition applications"
+            src="/images/insight_functional_food_matrix_1790839527671.jpg"
+            alt="Industrial food, nutrition, and cosmetic applications"
+            referrerPolicy="no-referrer"
             className="w-full h-full object-cover mix-blend-luminosity"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#102A43] via-[#102A43]/85 to-[#102A43]/60" />
@@ -79,6 +80,7 @@ export function ApplicationsPage() {
                     <img
                       src={app.image}
                       alt={app.title}
+                      referrerPolicy="no-referrer"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute top-3 left-3 bg-[#102A43]/90 backdrop-blur-xs text-white px-3 py-1 rounded-sm text-xs font-mono font-semibold flex items-center gap-2">
@@ -132,14 +134,21 @@ export function ApplicationsPage() {
                   </div>
 
                   {/* Action */}
-                  <div className="pt-4 flex items-center gap-3">
+                  <div className="pt-4 flex flex-wrap items-center gap-3">
                     <Button
-                      href="/partner-with-us"
+                      onClick={() =>
+                        navigateToEnquiry({
+                          enquiryType: 'Request a Sample',
+                          productInterest: 'Banana Powder (100% Pure)',
+                          intendedApplication: app.title,
+                          requiredQuantity: 'Sample Pack (1 kg – 5 kg)'
+                        })
+                      }
                       variant="primary"
                       size="sm"
                       showArrow
                     >
-                      Discuss Your Formulation
+                      Request Sample for {app.title}
                     </Button>
                     <Button
                       href="/ingredients/banana-powder"

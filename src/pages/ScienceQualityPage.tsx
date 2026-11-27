@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { jsPDF } from 'jspdf';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { Button } from '../components/ui/Button';
 import { QUALITY_STAGES, PRODUCT_SPEC_SHEET, DOCUMENTATION_LIBRARY } from '../data/quality';
-import { CURRENT_PRODUCT } from '../data/products';
+import { downloadSampleCoaTemplatePdf, downloadDocumentByCode } from '../lib/pdfDocuments';
 import {
   ShieldCheck,
   FileCheck,
@@ -27,7 +26,7 @@ type QualitySectionId =
   | 'sample-coa';
 
 export function ScienceQualityPage() {
-  const { openSpecSheetModal, navigate } = useRouter();
+  const { openSpecSheetModal, navigateToEnquiry } = useRouter();
   const [activeSection, setActiveSection] = useState<QualitySectionId>('quality-framework');
   const [heroImgLoaded, setHeroImgLoaded] = useState(true);
   const [downloadMessage, setDownloadMessage] = useState<string | null>(null);
@@ -86,162 +85,14 @@ export function ScienceQualityPage() {
   ];
 
   const handleDownloadSampleCoaPdf = () => {
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 44;
-    const contentWidth = pageWidth - margin * 2;
-    let y = 0;
+    const filename = downloadSampleCoaTemplatePdf();
+    setDownloadMessage(`Sample CoA Template PDF downloaded (${filename}).`);
+    setTimeout(() => setDownloadMessage(null), 4000);
+  };
 
-    // Header
-    doc.setFillColor(16, 42, 67);
-    doc.rect(0, 0, pageWidth, 86, 'F');
-    doc.setFillColor(184, 155, 94);
-    doc.rect(0, 86, pageWidth, 3, 'F');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(184, 155, 94);
-    doc.text('BHUVIQ NYRA INTERNATIONAL  |  SAMPLE CERTIFICATE OF ANALYSIS (FORMAT)', margin, 28);
-
-    doc.setFontSize(17);
-    doc.setTextColor(250, 247, 240);
-    doc.text('Sample CoA Template - Banana Powder (100% Pure)', margin, 51);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(225, 225, 220);
-    doc.text(
-      `Format Reference: DOC-BQNP-COA-STD  |  Botanical: ${CURRENT_PRODUCT.botanicalName}`,
-      margin,
-      70
-    );
-
-    y = 108;
-
-    // Notice banner
-    doc.setFillColor(247, 243, 234);
-    doc.rect(margin, y, contentWidth, 34, 'F');
-    doc.setDrawColor(184, 155, 94);
-    doc.rect(margin, y, contentWidth, 34, 'S');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(16, 42, 67);
-    doc.text(
-      'TEMPLATE NOTICE: Format reference only. Genuine batch-specific CoAs are issued separately per production lot.',
-      margin + 10,
-      y + 14
-    );
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(80, 92, 108);
-    doc.text(
-      'No placeholder test results or fabricated pass records are populated in this reference template.',
-      margin + 10,
-      y + 26
-    );
-
-    y += 50;
-
-    // Lot metadata template fields
-    const metaRows = [
-      ['Production Lot Number', '[Assigned per production run]'],
-      ['Manufacturing & Expiry Date', '[Lot-specific dates - 24 month shelf life]'],
-      ['Raw Material Origin', '[Approved supplier cluster traceability ID]'],
-      ['Ingredient & Peel Status', '100% Pure Ripe Banana (Peel Excluded)']
-    ];
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.setTextColor(16, 42, 67);
-    doc.text('BATCH TRACEABILITY HEADER FIELDS', margin, y);
-    y += 10;
-
-    metaRows.forEach(([k, v]) => {
-      doc.setDrawColor(220, 220, 215);
-      doc.line(margin, y, margin + contentWidth, y);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.setTextColor(16, 42, 67);
-      doc.text(k, margin + 4, y + 13);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(70, 82, 98);
-      doc.text(v, margin + 175, y + 13);
-      y += 20;
-    });
-    doc.line(margin, y, margin + contentWidth, y);
-    y += 20;
-
-    // Analytical table
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.setTextColor(16, 42, 67);
-    doc.text('ANALYTICAL PARAMETERS & TEST METHODS', margin, y);
-    y += 10;
-
-    const colX = [margin, margin + 150, margin + 295, margin + 410];
-    doc.setFillColor(16, 42, 67);
-    doc.rect(margin, y, contentWidth, 20, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(250, 247, 240);
-    doc.text('Parameter', colX[0] + 4, y + 13);
-    doc.text('Standard Spec', colX[1] + 4, y + 13);
-    doc.text('Test Method', colX[2] + 4, y + 13);
-    doc.text('Lot Result', colX[3] + 4, y + 13);
-    y += 20;
-
-    const specRows = [
-      ['Appearance & Colour', 'Pale golden-ivory to cream', 'Visual / Lovibond', '[Per Lot Assay]'],
-      ['Moisture Content', '<= 5.0% w/w', 'AOAC 925.10 / LOD', '[Per Lot Assay]'],
-      ['Particle Size', '>= 95% pass 60-100 Mesh', 'ASTM Sieve', '[Per Lot Assay]'],
-      ['pH (10% solution)', '4.8 - 5.6', 'Potentiometric', '[Per Lot Assay]'],
-      ['Bulk Density', '0.45 - 0.65 g/ml', 'USP <616>', '[Per Lot Assay]'],
-      ['Total Aerobic Count', '< 5,000 CFU/g', 'ISO 4833-1', '[Per Lot Assay]'],
-      ['Yeast & Mold', '< 100 CFU/g', 'ISO 21527-2', '[Per Lot Assay]'],
-      ['E. coli / Salmonella / S. aureus', 'Absent per ISO limit', 'ISO 16649 / 6579 / 6888', '[Per Lot Assay]'],
-      ['Water Activity / Heavy Metals', 'Confirmed per batch scope', 'Verified Lab Method', '[On Request / Lot]']
-    ];
-
-    specRows.forEach(([param, spec, method, res], idx) => {
-      if (idx % 2 === 1) {
-        doc.setFillColor(250, 248, 242);
-        doc.rect(margin, y, contentWidth, 20, 'F');
-      }
-      doc.setDrawColor(225, 225, 220);
-      doc.line(margin, y + 20, margin + contentWidth, y + 20);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(16, 42, 67);
-      doc.text(param, colX[0] + 4, y + 13);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(40, 89, 67);
-      doc.text(spec, colX[1] + 4, y + 13);
-      doc.setTextColor(80, 92, 108);
-      doc.text(method, colX[2] + 4, y + 13);
-      doc.text(res, colX[3] + 4, y + 13);
-      y += 20;
-    });
-
-    y += 22;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.setTextColor(70, 82, 98);
-    doc.text(
-      'Authorized QA Sign-Off: [Issued only after physical, chemical & microbiological release verification of the specific production lot]',
-      margin,
-      y
-    );
-
-    doc.setFontSize(8);
-    doc.setTextColor(102, 112, 133);
-    doc.text(
-      'BhuviQ Nyra International  •  Sample CoA Format Reference  •  Contact QA for lot-linked CoA issuance',
-      margin,
-      pageHeight - 24
-    );
-
-    doc.save('BhuviQ-Nyra-Sample-COA-Template.pdf');
-    setDownloadMessage('Sample CoA Template PDF downloaded (BhuviQ-Nyra-Sample-COA-Template.pdf).');
+  const handleDownloadDocument = (code: string, title: string) => {
+    const filename = downloadDocumentByCode(code);
+    setDownloadMessage(`${title} downloaded (${filename}).`);
     setTimeout(() => setDownloadMessage(null), 4000);
   };
 
@@ -311,9 +162,9 @@ export function ScienceQualityPage() {
       {/* Sticky Section Anchor Bar */}
       <nav
         aria-label="Quality documentation sections"
-        className="sticky top-[60px] sm:top-[64px] xl:top-[72px] z-30 bg-[#FAF8F2]/95 backdrop-blur-md border-b border-[#102A43]/10"
+        className="sticky top-[56px] sm:top-[64px] xl:top-[72px] z-30 bg-[#FAF8F2]/95 backdrop-blur-md border-b border-[#102A43]/10"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 py-3 overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 py-2 overflow-x-auto">
           <div className="flex items-center gap-2 sm:gap-4 text-xs font-semibold uppercase tracking-wider text-[#102A43]">
             {[
               { id: 'quality-framework', label: '01. Testing Flow' },
@@ -339,7 +190,12 @@ export function ScienceQualityPage() {
 
           <button
             type="button"
-            onClick={() => navigate('/partner-with-us')}
+            onClick={() =>
+              navigateToEnquiry({
+                enquiryType: 'Ask a Technical Question',
+                productInterest: 'Banana Powder (100% Pure)'
+              })
+            }
             className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#102A43] text-[#FAF7F0] hover:bg-[#285943] rounded-sm text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5 text-[#B89B5E]" />
@@ -693,7 +549,12 @@ export function ScienceQualityPage() {
                   Need a genuine Certificate of Analysis for an active batch or evaluation sample?
                 </span>
                 <Button
-                  href="/partner-with-us"
+                  onClick={() =>
+                    navigateToEnquiry({
+                      enquiryType: 'Ask a Technical Question',
+                      productInterest: 'Banana Powder (100% Pure)'
+                    })
+                  }
                   variant="primary"
                   size="sm"
                   showArrow
@@ -706,13 +567,21 @@ export function ScienceQualityPage() {
 
           {/* Applicable Quality Documents Library */}
           <div className="space-y-6 pt-4 border-t border-white/15">
-            <div>
-              <span className="font-mono text-xs uppercase tracking-widest text-[#B89B5E] font-semibold block">
-                Applicable Quality Documents
-              </span>
-              <h3 className="font-serif text-2xl sm:text-3xl text-[#FAF7F0] mt-1">
-                Standard Commercial & Compliance Documentation
-              </h3>
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div>
+                <span className="font-mono text-xs uppercase tracking-widest text-[#B89B5E] font-semibold block">
+                  Applicable Quality Documents
+                </span>
+                <h3 className="font-serif text-2xl sm:text-3xl text-[#FAF7F0] mt-1">
+                  Standard Commercial &amp; Compliance Documentation
+                </h3>
+              </div>
+              {downloadMessage && (
+                <div className="inline-flex items-center gap-2 text-xs font-medium text-[#FAF7F0] bg-[#285943] border border-[#B89B5E]/40 px-3.5 py-2 rounded-sm">
+                  <CheckCircle2 className="w-4 h-4 text-[#B89B5E] shrink-0" />
+                  <span>{downloadMessage}</span>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -729,14 +598,15 @@ export function ScienceQualityPage() {
                     <p className="text-xs text-[#FAF7F0]/75 leading-relaxed font-light">{doc.description}</p>
                   </div>
 
-                  <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                  <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
                     <span className="text-[11px] font-mono text-[#FAF7F0]/60">{doc.category}</span>
                     <button
                       type="button"
-                      onClick={doc.code === 'DOC-BQNP-COA-STD' ? handleDownloadSampleCoaPdf : openSpecSheetModal}
-                      className="text-xs font-semibold text-[#B89B5E] hover:text-white transition-colors cursor-pointer"
+                      onClick={() => handleDownloadDocument(doc.code, doc.title)}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#B89B5E] hover:text-white transition-colors cursor-pointer shrink-0"
                     >
-                      {doc.code === 'DOC-BQNP-COA-STD' ? 'Download Template →' : 'Inspect Format →'}
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download PDF</span>
                     </button>
                   </div>
                 </div>
@@ -753,7 +623,7 @@ export function ScienceQualityPage() {
             <div className="space-y-1.5 max-w-2xl">
               <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#285943] font-semibold">
                 <Layers className="w-4 h-4" />
-                <span>Direct QA & Regulatory Support</span>
+                <span>Direct QA &amp; Regulatory Support</span>
               </div>
               <h3 className="font-serif text-2xl sm:text-3xl text-[#102A43] font-semibold">
                 Request lot-specific CoAs or custom analytical documentation
@@ -765,7 +635,12 @@ export function ScienceQualityPage() {
 
             <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
               <Button
-                href="/partner-with-us"
+                onClick={() =>
+                  navigateToEnquiry({
+                    enquiryType: 'Ask a Technical Question',
+                    productInterest: 'Banana Powder (100% Pure)'
+                  })
+                }
                 variant="primary"
                 size="md"
                 showArrow

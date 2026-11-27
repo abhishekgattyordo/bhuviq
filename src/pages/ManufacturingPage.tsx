@@ -22,9 +22,10 @@ export function ManufacturingPage() {
       <section className="relative bg-[#102A43] text-white pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=2000&q=80"
-            alt="Advanced manufacturing line"
-            className="w-full h-full object-cover opacity-20 mix-blend-luminosity"
+            src="/images/sector_ss316_processing_line_1790839222801.jpg"
+            alt="SS-316 enclosed banana processing line"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover opacity-25 mix-blend-luminosity"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#102A43] via-[#102A43]/85 to-[#102A43]/60" />
         </div>
@@ -158,11 +159,12 @@ export function ManufacturingPage() {
                 <img
                   src={activeStep.image}
                   alt={`BhuviQ Nyra Facility - Stage 0${activeStep.id}: ${activeStep.name}`}
+                  referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                   loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80";
+                    target.src = "/images/sector_ss316_processing_line_1790839222801.jpg";
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#102A43]/80 via-transparent to-transparent" />
