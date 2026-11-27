@@ -1,0 +1,8 @@
+{
+  "name": "BhuviQ Nyra International",
+  "description": "BhuviQ Nyra International transforms naturally sourced agricultural resources into high-quality ingredients for food, nutrition, wellness and beyond. Nature. Science. Possibility.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

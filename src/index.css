@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Garamond, Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-brand-navy: #102A43;
+  --color-brand-navy-dark: #0B1D2E;
+  --color-brand-navy-light: #1D3B58;
+  --color-brand-green: #285943;
+  --color-brand-green-dark: #1C3F30;
+  --color-brand-green-light: #377357;
+  --color-brand-ivory: #F7F3EA;
+  --color-brand-ivory-light: #FAF8F2;
+  --color-brand-ivory-dark: #EBE5D6;
+  --color-brand-gold: #B89B5E;
+  --color-brand-gold-light: #D4BD86;
+  --color-brand-dark: #17202A;
+  --color-brand-muted: #667085;
+}
+
+:root {
+  font-family: var(--font-sans);
+  color: #17202A;
+  background-color: #F7F3EA;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F3EA;
+}
+::-webkit-scrollbar-thumb {
+  background: #D4BD86;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B89B5E;
+}
+
+/* Glass and elevation effects */
+.glass-header {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.subtle-ring {
+  box-shadow: 0 0 0 1px rgba(16, 42, 67, 0.08);
+}
+
+.gold-glow {
+  box-shadow: 0 4px 20px -2px rgba(184, 155, 94, 0.15);
+}
